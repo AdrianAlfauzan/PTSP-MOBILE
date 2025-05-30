@@ -1,36 +1,44 @@
+// useGoogleLogin.ts
+import { useRouter } from "expo-router";
 import { useEffect } from "react";
 import auth from "@react-native-firebase/auth";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
+import Constants from "expo-constants";
 
 export const useGoogleLogin = () => {
+  const router = useRouter();
+
   useEffect(() => {
     GoogleSignin.configure({
-      webClientId: "829294397794-49j4vv22ji3fe4pv7ubreknfclbt82sa.apps.googleusercontent.com", // ambil dari Firebase Console
+      webClientId: Constants.expoConfig?.extra?.GOOGLE_WEB_CLIENT_ID,
       offlineAccess: true,
     });
   }, []);
 
-  const signInWithGoogle = async () => {
+  const signIn = async () => {
     try {
-      // Mulai proses login
-      // const userInfo = await GoogleSignin.signIn();
+      console.log("Mulai login dengan Google...");
 
-      // Ambil token untuk autentikasi Firebase
+      const userInfo = await GoogleSignin.signIn();
+      console.log("User info:", userInfo);
+
       const { idToken } = await GoogleSignin.getTokens();
+      console.log("ID Token:", idToken);
 
       if (!idToken) {
-        throw new Error("ID Token tidak ditemukan. Login dibatalkan.");
+        throw new Error("ID Token tidak ditemukan.");
       }
 
       const googleCredential = auth.GoogleAuthProvider.credential(idToken);
       const userCredential = await auth().signInWithCredential(googleCredential);
+      console.log("Login Firebase berhasil:", userCredential.user);
 
-      return userCredential.user;
-    } catch (error) {
-      console.error("Google Sign-In Error: ", JSON.stringify(error, null, 2));
-      throw error;
+      router.replace("/screens/registerScreen");
+    } catch (error: any) {
+      console.error("Login gagal:", error);
+      alert(`Login gagal: ${error?.message ?? "Terjadi kesalahan (error kosong)."}`);
     }
   };
 
-  return { signInWithGoogle };
+  return { signIn };
 };

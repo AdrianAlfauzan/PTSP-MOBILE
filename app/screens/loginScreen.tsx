@@ -1,5 +1,4 @@
 import { Image, Animated, View, Text, Easing } from "react-native";
-import { useRouter } from "expo-router";
 import { useEffect, useRef } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -10,12 +9,11 @@ import Button from "@/components/button";
 import { useGoogleLogin } from "@/hooks/Backend/useGoogleLogin";
 
 export default function LoginScreen() {
-  const router = useRouter();
   const vectorTranslateY = useRef(new Animated.Value(-300)).current;
   const textTranslateX = useRef(new Animated.Value(400)).current;
   const buttonTranslateX = useRef(new Animated.Value(-400)).current;
 
-  const { signInWithGoogle } = useGoogleLogin();
+  const { signIn } = useGoogleLogin();
 
   useEffect(() => {
     Animated.parallel([
@@ -68,16 +66,7 @@ export default function LoginScreen() {
             textStyle="text-white"
             iconPosition="left"
             image={require("@/assets/images/LoginScreen/google.png")}
-            onPress={async () => {
-              try {
-                const user = await signInWithGoogle();
-                console.log("Login berhasil:", user);
-                router.replace("/(tabs)/profile");
-              } catch (error: any) {
-                console.error("Login gagal:", JSON.stringify(error, null, 2));
-                alert(`Login gagal: ${error?.message ?? "Terjadi kesalahan."}`);
-              }
-            }}
+            onPress={signIn}
           >
             Masuk Menggunakan Google aja
           </Button>
