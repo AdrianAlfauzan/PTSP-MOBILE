@@ -89,17 +89,20 @@ export default function FormDropdownSelect({
         className={`flex-row items-center justify-between rounded-xl border border-[#6BBC3F] bg-white px-4 py-3 ${toggleDropdownClassName}`}
         activeOpacity={0.8}
       >
+        {/* TEXT — harus fleksibel */}
         <Text
-          className={`${selectedTextClassName || 'text-[#6BBC3F]'}`}
-          style={customFontSelected}
+          className={`flex-1 ${selectedTextClassName || 'text-[#6BBC3F]'}`}
+          style={[customFontSelected, { flexShrink: 1 }]}
         >
           {selected || `Pilih ${label?.toLowerCase() || 'opsi'}`}
         </Text>
 
+        {/* ICON — tidak boleh bergerak */}
         <Entypo
           name={open ? 'chevron-small-up' : 'chevron-small-down'}
-          size={24}
+          size={20} // 24 kadang masuk tapi 20 paling aman
           color={iconColor || '#6BBC3F'}
+          style={{ marginLeft: 8 }}
         />
       </TouchableOpacity>
 

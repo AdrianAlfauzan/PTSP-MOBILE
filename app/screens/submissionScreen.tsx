@@ -204,129 +204,129 @@ export default function SubmissionScreen() {
                 Form Pengajuan Kegiatan
               </Text>
             </View>
-            <View className="px-7 pt-2">
+            <View className="gap-10 space-y-4 px-7 pt-6">
               {selectedData.files.map((field, idx) => (
-                <View key={idx} className="gap-2">
+                <View key={idx} className="rounded-2xl bg-gray-200 p-4 shadow-md">
+                  {/* Nama field */}
                   <Text
-                    className="self-start text-[15px]"
+                    className="mb-2 text-[15px] text-gray-700"
                     style={{ fontFamily: 'LexSemiBold' }}
                   >
                     {field}
                   </Text>
 
+                  {/* Tombol Upload */}
                   <TouchableOpacity
                     onPress={() => handleUpload(field)}
-                    className="items-center rounded-[8px] bg-[#1475BA] py-2"
+                    className="mb-3 items-center rounded-[8px] bg-[#1475BA] py-2"
                     activeOpacity={0.8}
                   >
-                    <Text
-                      style={{
-                        color: 'white',
-                        fontFamily: 'LexSemiBold',
-                      }}
-                    >
+                    <Text style={{ color: 'white', fontFamily: 'LexSemiBold' }}>
                       Upload File
                     </Text>
                   </TouchableOpacity>
 
+                  {/* Preview file jika sudah ada */}
                   {fileMap[field] && (
-                    <View className="mt-2 flex-row items-center gap-4 rounded-[10px] border border-gray-300 px-4 py-2">
-                      {getFileIcon(fileMap[field].name)}
-                      <View className="flex-1 flex-col">
-                        <Text style={{ fontFamily: 'LexMedium' }}>
-                          {(() => {
-                            const name = fileMap[field].name;
-                            const lastDot = name.lastIndexOf('.');
-                            const baseName = name.substring(0, lastDot);
-                            const extension = name.substring(lastDot);
-                            const slicedName =
-                              baseName.length > 20
-                                ? baseName.slice(0, 20) + '...'
-                                : baseName;
-                            return slicedName + extension;
-                          })()}
-                        </Text>
+                    <View className="flex-col gap-2">
+                      <View className="flex-row items-center gap-4">
+                        {getFileIcon(fileMap[field].name)}
+                        <View className="flex-1 flex-col">
+                          <Text
+                            style={{ fontFamily: 'LexMedium' }}
+                            numberOfLines={1}
+                          >
+                            {(() => {
+                              const name = fileMap[field].name;
+                              const lastDot = name.lastIndexOf('.');
+                              const baseName = name.substring(0, lastDot);
+                              const extension = name.substring(lastDot);
+                              return baseName.length > 20
+                                ? baseName.slice(0, 20) + '...' + extension
+                                : name;
+                            })()}
+                          </Text>
 
-                        <Text style={{ fontFamily: 'LexMedium' }}>
-                          {(fileMap[field].size / 1024).toFixed(2)} KB
-                        </Text>
-                        <View className="mb-3 mt-2 h-[8px] w-full overflow-hidden rounded-md bg-gray-300">
-                          <View
-                            className="h-full bg-green-500"
-                            style={{
-                              width: `${fileMap[field].progress}%`,
-                            }}
-                          />
-                        </View>
+                          <Text
+                            style={{ fontFamily: 'LexMedium', fontSize: 12 }}
+                          >
+                            {(fileMap[field].size / 1024).toFixed(2)} KB
+                          </Text>
 
-                        <View className="flex-row items-center justify-between">
-                          {fileMap[field].progress >= 100 ? (
-                            <View className="flex-row items-center gap-1">
-                              <Animatable.View
-                                animation="bounceIn"
-                                duration={2000}
-                                useNativeDriver
+                          {/* Progress Bar */}
+                          <View className="mt-2 h-[8px] w-full overflow-hidden rounded-md bg-gray-300">
+                            <View
+                              className="h-full bg-green-500"
+                              style={{ width: `${fileMap[field].progress}%` }}
+                            />
+                          </View>
+
+                          {/* Status & Action Buttons */}
+                          <View className="mt-2 flex-row items-center justify-between">
+                            {fileMap[field].progress >= 100 ? (
+                              <View className="flex-row items-center gap-1">
+                                <Animatable.View
+                                  animation="bounceIn"
+                                  duration={2000}
+                                  useNativeDriver
+                                >
+                                  <Ionicons
+                                    name="checkmark-circle-sharp"
+                                    size={18}
+                                    color="green"
+                                  />
+                                </Animatable.View>
+                                <Animatable.Text
+                                  animation={{
+                                    from: { opacity: 0, translateX: -10 },
+                                    to: { opacity: 1, translateX: 0 },
+                                  }}
+                                  delay={500}
+                                  duration={600}
+                                  style={{
+                                    fontFamily: 'LexMedium',
+                                    fontSize: 11,
+                                  }}
+                                >
+                                  Upload Berhasil!
+                                </Animatable.Text>
+                              </View>
+                            ) : (
+                              <View />
+                            )}
+
+                            <View className="flex-row gap-2">
+                              <TouchableOpacity
+                                onPress={() => handleRemoveFile(field)}
+                                disabled={fileMap[field].progress < 100}
+                                className={`items-center justify-center rounded-[5px] px-3 py-2 ${
+                                  fileMap[field].progress < 100
+                                    ? 'bg-gray-400'
+                                    : 'bg-red-500'
+                                }`}
                               >
                                 <Ionicons
-                                  name="checkmark-circle-sharp"
+                                  name="trash"
                                   size={18}
-                                  color="green"
+                                  color="white"
                                 />
-                              </Animatable.View>
+                              </TouchableOpacity>
 
-                              <Animatable.Text
-                                animation={{
-                                  from: {
-                                    opacity: 0,
-                                    translateX: -10,
-                                  },
-                                  to: {
-                                    opacity: 1,
-                                    translateX: 0,
-                                  },
+                              <TouchableOpacity
+                                onPress={() => {
+                                  if (fileMap[field].progress >= 100)
+                                    openPreview(fileMap[field]);
                                 }}
-                                delay={500}
-                                duration={600}
-                                style={{ fontFamily: 'LexMedium' }}
-                                className="text-[11px]"
+                                disabled={fileMap[field].progress < 100}
+                                className={`items-center justify-center rounded-[5px] px-3 py-2 ${
+                                  fileMap[field].progress < 100
+                                    ? 'bg-gray-400'
+                                    : 'bg-[#1475BA]'
+                                }`}
                               >
-                                Upload Berhasil !
-                              </Animatable.Text>
+                                <Ionicons name="eye" size={18} color="white" />
+                              </TouchableOpacity>
                             </View>
-                          ) : (
-                            <View />
-                          )}
-
-                          <View className="mt-1 flex-row gap-2">
-                            {/* Tombol Hapus */}
-                            <TouchableOpacity
-                              onPress={() => handleRemoveFile(field)}
-                              disabled={fileMap[field].progress < 100}
-                              className={`items-center justify-center rounded-[5px] px-3 py-2 ${
-                                fileMap[field].progress < 100
-                                  ? 'bg-gray-400'
-                                  : 'bg-red-500'
-                              }`}
-                            >
-                              <Ionicons name="trash" size={18} color="white" />
-                            </TouchableOpacity>
-
-                            {/* Tombol Preview */}
-                            <TouchableOpacity
-                              onPress={() => {
-                                if (fileMap[field].progress >= 100) {
-                                  openPreview(fileMap[field]);
-                                }
-                              }}
-                              disabled={fileMap[field].progress < 100}
-                              className={`items-center justify-center rounded-[5px] px-3 py-2 ${
-                                fileMap[field].progress < 100
-                                  ? 'bg-gray-400'
-                                  : 'bg-[#1475BA]'
-                              }`}
-                            >
-                              <Ionicons name="eye" size={18} color="white" />
-                            </TouchableOpacity>
                           </View>
                         </View>
                       </View>

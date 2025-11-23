@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, Animated, Image } from 'react-native';
+import { View, Text, Animated, Image, ScrollView } from 'react-native';
+import { useRouter } from 'expo-router';
 
 // ICONS
 import { MaterialIcons } from '@expo/vector-icons';
@@ -20,13 +21,12 @@ import { useGetUserProfile } from '@/hooks/Backend/useGetUserProfile';
 import { useSkeletonForTab } from '@/hooks/Frontend/skeletons/useSkeletonForTab';
 
 export default function ProfileTabs() {
+  const router = useRouter();
   const { activePopup, handleShowPopup, handleClosePopup, translateY } =
     useProfilePopup();
-
   const { profile, loading } = useGetUserProfile();
   const showSkeleton = useSkeletonForTab();
 
-  // jika loading atau skeleton aktif, tampilkan skeleton
   if (loading || showSkeleton) {
     return (
       <View className="flex-1 items-center justify-center bg-[#1475BA]">
@@ -59,81 +59,131 @@ export default function ProfileTabs() {
             />
             <Text
               className="text-xl text-black"
-              style={{ fontFamily: 'LexBold' }}
+              style={{ fontFamily: 'LexMedium' }}
             >
               {profile?.Nama_Lengkap ?? 'Nama tidak tersedia'}
             </Text>
             <Text
               className="mt-1 text-base text-black"
-              style={{ fontFamily: 'LexRegular' }}
+              style={{ fontFamily: 'LexLight' }}
             >
               {profile?.Email ?? 'Email tidak tersedia'}
             </Text>
           </View>
 
           {/* CARD MENU */}
-          <View className="h-full gap-4 rounded-2xl bg-white p-6">
-            <View className="gap-10 rounded-2xl bg-[#EEEEEE] p-4">
+          <ScrollView
+            className="h-full rounded-t-3xl bg-white p-6"
+            contentContainerStyle={{ paddingBottom: 20 }}
+            showsVerticalScrollIndicator={false}
+          >
+            <View className="gap-6">
+              {/* ISI PESANAN SAYA */}
+              <View className="rounded-2xl bg-[#EEEEEE]">
+                <ButtonCustom
+                  classNameContainer="flex-row items-center justify-between  "
+                  text="Pesanan Saya"
+                  iconLeft={<Feather name="user" size={22} color="#333" />}
+                  iconRight={
+                    <View className="h-10 w-10 items-center justify-center rounded-full bg-gray-200">
+                      <MaterialIcons
+                        name="keyboard-arrow-right"
+                        size={24}
+                        color="#999"
+                      />
+                    </View>
+                  }
+                  textClassName="text-black text-[16px] pl-2"
+                  textStyle={{ fontFamily: 'LexLight' }}
+                  onPressRightIcon={() => router.push('/screens/orderScreen')}
+                />
+                <ButtonCustom
+                  classNameContainer="flex-row items-center justify-between  "
+                  text="Pesanan Favorit"
+                  iconLeft={<Feather name="user" size={22} color="#333" />}
+                  iconRight={
+                    <View className="h-10 w-10 items-center justify-center rounded-full bg-gray-200">
+                      <MaterialIcons
+                        name="keyboard-arrow-right"
+                        size={24}
+                        color="#999"
+                      />
+                    </View>
+                  }
+                  textClassName="text-black text-[16px] pl-2"
+                  textStyle={{ fontFamily: 'LexLight' }}
+                />
+              </View>
+
+              {/* ISI EDIT PROFIL */}
+              <View className="rounded-2xl bg-[#EEEEEE]">
+                <ButtonCustom
+                  classNameContainer="flex-row items-center justify-between  "
+                  text="Edit Profil"
+                  iconLeft={<Feather name="user" size={22} color="#333" />}
+                  iconRight={
+                    <View className="h-10 w-10 items-center justify-center rounded-full bg-gray-200">
+                      <MaterialIcons
+                        name="keyboard-arrow-right"
+                        size={24}
+                        color="#999"
+                      />
+                    </View>
+                  }
+                  textClassName="text-black text-[16px] pl-2"
+                  textStyle={{ fontFamily: 'LexLight' }}
+                  onPressRightIcon={() => handleShowPopup('editProfile')}
+                />
+              </View>
+
+              {/* ISI KEAMANAN & NOTIFIKASI*/}
+              <View className="rounded-2xl bg-[#EEEEEE]">
+                <ButtonCustom
+                  classNameContainer="flex-row items-center justify-between "
+                  text="Keamanan"
+                  iconLeft={<Feather name="lock" size={22} color="#333" />}
+                  iconRight={
+                    <View className="h-10 w-10 items-center justify-center rounded-full bg-gray-200">
+                      <MaterialIcons
+                        name="keyboard-arrow-right"
+                        size={24}
+                        color="#999"
+                      />
+                    </View>
+                  }
+                  textClassName="text-black text-[16px] pl-2"
+                  textStyle={{ fontFamily: 'LexLight' }}
+                  onPressRightIcon={() => handleShowPopup('securityProfile')}
+                />
+                <ButtonCustom
+                  classNameContainer="flex-row items-center justify-between  "
+                  text="Notifikasi"
+                  iconLeft={<Feather name="bell" size={22} color="#333" />}
+                  iconRight={
+                    <View className="h-10 w-10 items-center justify-center rounded-full bg-gray-200">
+                      <MaterialIcons
+                        name="keyboard-arrow-right"
+                        size={24}
+                        color="#999"
+                      />
+                    </View>
+                  }
+                  textClassName="text-black text-[16px] pl-2"
+                  textStyle={{ fontFamily: 'LexLight' }}
+                  onPressRightIcon={() =>
+                    handleShowPopup('notificationProfile')
+                  }
+                />
+              </View>
               <ButtonCustom
-                classNameContainer="flex-row items-center justify-between py-3 "
-                text="Edit Profil"
-                iconLeft={<Feather name="user" size={22} color="#333" />}
-                iconRight={
-                  <View className="h-10 w-10 items-center justify-center rounded-full bg-gray-200">
-                    <MaterialIcons
-                      name="keyboard-arrow-right"
-                      size={24}
-                      color="#999"
-                    />
-                  </View>
-                }
-                textClassName="text-black text-[16px] pl-2"
-                textStyle={{ fontFamily: 'LexRegular' }}
-                onPressRightIcon={() => handleShowPopup('editProfile')}
-              />
-              <ButtonCustom
-                classNameContainer="flex-row items-center justify-between py-3"
-                text="Keamanan"
-                iconLeft={<Feather name="lock" size={22} color="#333" />}
-                iconRight={
-                  <View className="h-10 w-10 items-center justify-center rounded-full bg-gray-200">
-                    <MaterialIcons
-                      name="keyboard-arrow-right"
-                      size={24}
-                      color="#999"
-                    />
-                  </View>
-                }
-                textClassName="text-black text-[16px] pl-2"
-                textStyle={{ fontFamily: 'LexRegular' }}
-                onPressRightIcon={() => handleShowPopup('securityProfile')}
-              />
-              <ButtonCustom
-                classNameContainer="flex-row items-center justify-between py-3 "
-                text="Notifikasi"
-                iconLeft={<Feather name="bell" size={22} color="#333" />}
-                iconRight={
-                  <View className="h-10 w-10 items-center justify-center rounded-full bg-gray-200">
-                    <MaterialIcons
-                      name="keyboard-arrow-right"
-                      size={24}
-                      color="#999"
-                    />
-                  </View>
-                }
-                textClassName="text-black text-[16px] pl-2"
-                textStyle={{ fontFamily: 'LexRegular' }}
-                onPressRightIcon={() => handleShowPopup('notificationProfile')}
+                classNameContainer="bg-[#DC0202] py-[10px] rounded-2xl"
+                text="Logout"
+                textClassName="text-white text-center text-[18px]"
+                textStyle={{ fontFamily: 'LexBold' }}
+                onPress={() => alert('Keluar')}
               />
             </View>
-            <ButtonCustom
-              classNameContainer="bg-[#DC0202] py-[10px] rounded-2xl"
-              text="Logout"
-              textClassName="text-white text-center text-[18px]"
-              textStyle={{ fontFamily: 'LexBold' }}
-              onPress={() => alert('Keluar')}
-            />
-          </View>
+          </ScrollView>
         </Animated.View>
       )}
 
