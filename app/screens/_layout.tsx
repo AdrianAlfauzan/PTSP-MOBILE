@@ -1,72 +1,61 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { View, Text } from 'react-native';
-import { Stack, usePathname } from 'expo-router';
-import { useInternetStatus } from '@/hooks/Backend/useInternetStatus';
+import { Stack } from 'expo-router';
+
+// COMPONENTS
 import NavbarForScreens from '@/components/navbarForScreens';
-import { useGlobalSearch } from '@/hooks/Backend/useGlobalSearch';
-import { NavbarContextProvider } from '@/context/NavbarContext'; // ⬅️ tambahkan ini
+
+// CONTEXT
+import { NavbarContextProvider } from '@/context/NavbarContext';
+import { SearchProvider } from '@/context/SearchContext';
+
+// HOOKS
+import { useInternetStatus } from '@/hooks/Backend/useInternetStatus';
+import useNavbarVisibility from '@/hooks/Frontend/useNavbarVisibility';
+import { useGlobalSearch } from '@/hooks/Frontend/useGlobalSearch';
 
 export default function ScreensLayout() {
-  const pathname = usePathname();
   const { isConnected } = useInternetStatus();
+  const { showNavbar } = useNavbarVisibility();
 
-  // hanya untuk state search (tidak berhubungan dengan navbar title)
   const { searchQuery, updateSearchQuery } = useGlobalSearch([], {
     searchFields: [],
     enabled: true,
   });
 
-  const handleSearchChange = React.useCallback(
-    (query: string) => {
-      updateSearchQuery(query);
-    },
+  const handleSearchChange = useCallback(
+    (query: string) => updateSearchQuery(query),
     [updateSearchQuery]
   );
 
-  const handleSearchSubmit = React.useCallback(() => {
-    console.log('🔍 [Layout] Search submitted:', searchQuery);
-  }, [searchQuery]);
-
-  // Daftar halaman yang tidak menampilkan navbar
-  const hideNavbarScreens = [
-    '/screens/splashScreen',
-    '/screens/welcomeScreen',
-    '/screens/loginScreen',
-    '/screens/registerScreen',
-    '/screens/companyRegisterScreen',
-    '/screens/individualRegisterScreen',
-    '/screens/successOrderScreen',
-  ];
-
-  const shouldHideNavbar = hideNavbarScreens.some((path) =>
-    pathname.includes(path)
-  );
+  const handleSearchSubmit = useCallback(() => {}, []);
 
   return (
-    // ✅ Bungkus seluruh layout dengan NavbarContext
-    <NavbarContextProvider>
-      <View className="flex-1">
-        {!shouldHideNavbar && (
-          <NavbarForScreens
-            searchQuery={searchQuery}
-            onSearchChange={handleSearchChange}
-            onSearchSubmit={handleSearchSubmit}
-          />
-        )}
+    <SearchProvider>
+      <NavbarContextProvider>
+        <View className="flex-1">
+          {showNavbar && (
+            <NavbarForScreens
+              searchQuery={searchQuery}
+              onSearchChange={handleSearchChange}
+              onSearchSubmit={handleSearchSubmit}
+            />
+          )}
 
-        <Stack screenOptions={{ headerShown: false }} />
+          <Stack screenOptions={{ headerShown: false }} />
 
-        {!isConnected && (
-          <View
-            className="absolute bottom-0 w-full bg-red-600 p-2"
-            style={{ zIndex: 1000 }}
-          >
-            <Text className="font-LexBold text-center text-white">
-              Tidak ada koneksi internet
-            </Text>
-          </View>
-        )}
-      </View>
-    </NavbarContextProvider>
+          {!isConnected && (
+            <View
+              className="absolute bottom-0 w-full bg-red-600 p-2"
+              style={{ zIndex: 1000 }}
+            >
+              <Text className="font-LexBold text-center text-white">
+                Tidak ada koneksi internet
+              </Text>
+            </View>
+          )}
+        </View>
+      </NavbarContextProvider>
+    </SearchProvider>
   );
 }

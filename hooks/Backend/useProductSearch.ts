@@ -1,7 +1,7 @@
 // hooks/useProductSearch.ts
 import { useCallback } from 'react';
 import { ProductData } from '@/interfaces/productDataProps';
-import { useGlobalSearch } from './useGlobalSearch';
+import { useGlobalSearch } from '../Frontend/useGlobalSearch';
 
 // ✅ PRODUCT-SPECIFIC CONFIG
 const productSearchConfig = {
@@ -20,24 +20,27 @@ const productFilterFn = (product: ProductData, query: string): boolean => {
   );
 };
 
+interface UseProductSearchOptions {
+  enabled?: boolean;
+  customFilter?: (product: ProductData, query: string) => boolean;
+  autoClearOnUnmount?: boolean;
+  externalQuery?: string; // ✅ Tambahkan ini
+}
+
 export function useProductSearch(
   products: ProductData[] = [],
-  options?: {
-    enabled?: boolean;
-    customFilter?: (product: ProductData, query: string) => boolean;
-    autoClearOnUnmount?: boolean; // ✅ PASS KE useGlobalSearch
-  }
+  options?: UseProductSearchOptions
 ) {
   const config = {
     ...productSearchConfig,
     filterFn: options?.customFilter || productFilterFn,
     enabled: options?.enabled ?? true,
-    autoClearOnUnmount: options?.autoClearOnUnmount ?? false, // ✅ PASS OPTION INI
+    autoClearOnUnmount: options?.autoClearOnUnmount ?? false,
+    externalQuery: options?.externalQuery, // ✅ pass ke useGlobalSearch
   };
 
   const search = useGlobalSearch(products, config);
 
-  // ✅ PRODUCT-SPECIFIC EXTENSIONS
   const searchByPriceRange = useCallback(
     (minPrice: number, maxPrice: number) => {
       return products.filter(

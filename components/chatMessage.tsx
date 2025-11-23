@@ -168,7 +168,6 @@ export default function ChatMessage({
                       await Linking.openURL(msg.urlFile);
                     }
                   } catch (err) {
-                    console.error('Gagal buka file:', err);
                     Alert.alert('Error', 'File tidak bisa dibuka');
                   }
                 }}

@@ -1,4 +1,3 @@
-// hooks/useGlobalSearch.ts
 import { useState, useEffect, useMemo, useCallback } from 'react';
 
 // ✅ SIMPLIFIED GLOBAL STATE - FIX RETURN TYPE
@@ -10,7 +9,6 @@ const createGlobalSearchState = () => {
     getQuery: () => query,
 
     setQuery: (newQuery: string) => {
-      console.log('🌍 [GlobalState] Setting query:', newQuery);
       if (query === newQuery) return;
 
       query = newQuery;
@@ -19,7 +17,8 @@ const createGlobalSearchState = () => {
         try {
           listener(newQuery);
         } catch (error) {
-          console.error('Error in search listener:', error);
+          // console.error('Error in search listener:', error);
+          throw error;
         }
       });
     },
@@ -127,7 +126,6 @@ export function useGlobalSearch<T>(
   );
 
   const clearSearch = useCallback(() => {
-    console.log('🧹 [useGlobalSearch] Clearing search');
     updateSearchQuery('');
   }, [updateSearchQuery]);
 
@@ -147,7 +145,6 @@ export function useGlobalSearch<T>(
   useEffect(() => {
     if (autoClearOnUnmount) {
       return () => {
-        console.log('🧹 [useGlobalSearch] Auto-clearing search on unmount');
         clearSearch();
       };
     }

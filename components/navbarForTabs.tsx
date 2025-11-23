@@ -1,22 +1,26 @@
+import React from 'react';
 import { View, Image, TextInput, TouchableOpacity } from 'react-native';
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from 'react-native-responsive-screen';
-import { usePathname } from 'expo-router';
 import Octicons from '@expo/vector-icons/Octicons';
 
 // OUR COMPONENTS
 import ButtonShopAndChat from '@/components/buttonShopAndChat';
 
+// OUR CONTEXT
+import { useSearch } from '@/context/SearchContext';
+
+// OUR HOOKS
+import useNavbarVisibility from '@/hooks/Frontend/useNavbarVisibility';
+
+import {
+  widthPercentageToDP as wp,
+  heightPercentageToDP as hp,
+} from 'react-native-responsive-screen';
+
 export default function NavbarForTabs() {
-  const pathname = usePathname();
+  const { showShopButton, showChatButton, pathname } = useNavbarVisibility();
+  const { searchQuery, setSearchQuery } = useSearch();
   const isProductPage = pathname?.includes('/product');
 
-  // Jangan tampilkan navbar di halaman profile
-  if (pathname?.includes('/profile')) {
-    return null;
-  }
   return (
     <View
       className="bg-[#1475BA] shadow-md"
@@ -32,17 +36,12 @@ export default function NavbarForTabs() {
         elevation: 5,
       }}
     >
-      {/* ✅ Pembungkus utama agar sejajar di semua mode */}
       <View
         className="flex-row items-center justify-between"
-        style={{
-          height: hp(6),
-        }}
+        style={{ height: hp(6) }}
       >
-        {/* ✅ Kiri: Logo / Search */}
         <View className="flex-1 flex-row items-center">
           {isProductPage ? (
-            // 🔍 Search bar khusus halaman Product
             <View
               className="flex-1 flex-row items-center rounded-full bg-white"
               style={{
@@ -55,6 +54,8 @@ export default function NavbarForTabs() {
                 className="flex-1"
                 placeholder="Cari produk..."
                 placeholderTextColor="gray"
+                value={searchQuery}
+                onChangeText={setSearchQuery}
                 style={{
                   fontFamily: 'LexRegular',
                   fontSize: wp(3.6),
@@ -74,7 +75,6 @@ export default function NavbarForTabs() {
               </TouchableOpacity>
             </View>
           ) : (
-            // Logo untuk halaman lain
             <Image
               source={require('@/assets/images/HomeScreen/logo.png')}
               style={{
@@ -86,10 +86,10 @@ export default function NavbarForTabs() {
           )}
         </View>
 
-        {/* ✅ Kanan: tombol Shop & Chat (selalu ada) */}
-        <View className="flex-row items-center" style={{ gap: wp('4%') }}>
-          <ButtonShopAndChat />
-        </View>
+        <ButtonShopAndChat
+          showButtonShop={showShopButton}
+          showButtonChat={showChatButton}
+        />
       </View>
     </View>
   );
