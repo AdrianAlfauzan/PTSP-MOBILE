@@ -1,49 +1,37 @@
-import React, { useCallback } from 'react';
+// layouts/ScreensLayout.tsx
+import React, { useEffect, useState } from 'react';
 import { View, Text } from 'react-native';
 import { Stack } from 'expo-router';
 
-// COMPONENTS
+// OUR COMPONENTS
 import NavbarForScreens from '@/components/navbarForScreens';
-
-// CONTEXT
+// OUR CONTEXT
 import { NavbarContextProvider } from '@/context/NavbarContext';
 import { SearchProvider } from '@/context/SearchContext';
 
-// HOOKS
+// OUR HOOKS
 import { useInternetStatus } from '@/hooks/Backend/useInternetStatus';
 import useNavbarVisibility from '@/hooks/Frontend/useNavbarVisibility';
-import { useGlobalSearch } from '@/hooks/Frontend/useGlobalSearch';
 
 export default function ScreensLayout() {
-  const { isConnected } = useInternetStatus();
   const { showNavbar } = useNavbarVisibility();
+  const { isConnected } = useInternetStatus();
+  const [showReconnected, setShowReconnected] = useState(false);
 
-  const { searchQuery, updateSearchQuery } = useGlobalSearch([], {
-    searchFields: [],
-    enabled: true,
-  });
-
-  const handleSearchChange = useCallback(
-    (query: string) => updateSearchQuery(query),
-    [updateSearchQuery]
-  );
-
-  const handleSearchSubmit = useCallback(() => {}, []);
+  useEffect(() => {
+    if (isConnected) {
+      setShowReconnected(true);
+      const timer = setTimeout(() => setShowReconnected(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [isConnected]);
 
   return (
     <SearchProvider>
       <NavbarContextProvider>
         <View className="flex-1">
-          {showNavbar && (
-            <NavbarForScreens
-              searchQuery={searchQuery}
-              onSearchChange={handleSearchChange}
-              onSearchSubmit={handleSearchSubmit}
-            />
-          )}
-
+          {showNavbar && <NavbarForScreens />}
           <Stack screenOptions={{ headerShown: false }} />
-
           {!isConnected && (
             <View
               className="absolute bottom-0 w-full bg-red-600 p-2"
@@ -51,6 +39,16 @@ export default function ScreensLayout() {
             >
               <Text className="font-LexBold text-center text-white">
                 Tidak ada koneksi internet
+              </Text>
+            </View>
+          )}
+          {showReconnected && (
+            <View
+              className="absolute bottom-0 w-full bg-green-600 p-2"
+              style={{ zIndex: 1000 }}
+            >
+              <Text className="font-LexBold text-center text-white">
+                Koneksi berhasil kembali
               </Text>
             </View>
           )}

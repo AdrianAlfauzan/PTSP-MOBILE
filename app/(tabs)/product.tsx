@@ -1,64 +1,81 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Image } from 'react-native';
+// screens/Product.tsx
+import React, { useMemo } from 'react';
+import { View, Text, ScrollView, Image } from 'react-native';
 import { useRouter } from 'expo-router';
-
-// OUR COMPONENTS
+import { allProducts } from '@/lib/data/productList';
+import { useSearch } from '@/context/SearchContext';
 import Button from '@/components/button';
 
-// OUR CONTEXT
-import { useSearch } from '@/context/SearchContext';
+// Import reusable components
+import AnimatedTabBar from '@/components/animatedTabBar';
+import { useTabAnimation } from '@/hooks/Frontend/useAnimatedTab/useTabAnimation';
 
-// OUR DATA
-import { allProducts } from '@/lib/data/productList';
-
-// OUR INTERFACES
-import { ProductType } from '@/interfaces/productDataProps';
+// Define tabs
+const productTabs = ['Semua', 'Informasi', 'Jasa'] as const;
 
 export default function Product() {
   const router = useRouter();
-  const [activeCategory, setActiveCategory] = useState('Semua');
   const { searchQuery } = useSearch();
 
-  const filteredProducts =
-    activeCategory === 'Semua'
-      ? allProducts
-      : allProducts.filter((item) => item.category === activeCategory);
+  // Use reusable tab animation hook
+  const {
+    activeTab,
+    activeTabOffset,
+    activeTabWidth,
+    onTabPress,
+    onTabLayout,
+    tabContainerWidths,
+  } = useTabAnimation(productTabs, 'Semua');
 
-  const searchedProducts = filteredProducts.filter((item) => {
-    const query = searchQuery.toLowerCase();
-    return (
-      item.title.toLowerCase().includes(query) ||
-      item.desc.toLowerCase().includes(query) ||
-      item.category.toLowerCase().includes(query)
+  const filteredByCategory = useMemo(() => {
+    return activeTab === 'Semua'
+      ? allProducts
+      : allProducts.filter((item) => item.category === activeTab);
+  }, [activeTab]);
+
+  const searchedProducts = useMemo(() => {
+    if (!searchQuery.trim()) return filteredByCategory;
+    const q = searchQuery.toLowerCase();
+    return filteredByCategory.filter(
+      (item) =>
+        item.title.toLowerCase().includes(q) ||
+        item.desc.toLowerCase().includes(q) ||
+        item.category.toLowerCase().includes(q)
     );
-  });
+  }, [filteredByCategory, searchQuery]);
 
   return (
     <View className="flex-1">
-      {/* TAB CATEGORY */}
-      <View className="-mt-2 flex-row items-center justify-center gap-4 bg-[#A7CBE5] pb-2 pt-4">
-        {['Semua', 'Informasi', 'Jasa'].map((buttonCategory) => (
-          <TouchableOpacity
-            key={buttonCategory}
-            onPress={() => setActiveCategory(buttonCategory)}
-            activeOpacity={0.7}
-            className={`rounded-full px-4 py-2 ${
-              activeCategory === buttonCategory
-                ? 'bg-[#1475BA]'
-                : 'bg-transparent'
-            }`}
-          >
-            <Text
-              className="text-[16px]"
-              style={{
-                fontFamily: 'LexBold',
-                color: activeCategory === buttonCategory ? 'white' : 'black',
-              }}
-            >
-              {buttonCategory}
-            </Text>
-          </TouchableOpacity>
-        ))}
+      {/* Reusable Animated Tab Bar */}
+      <View className="bg-[#A7CBE5]">
+        <AnimatedTabBar
+          tabs={productTabs}
+          activeTab={activeTab}
+          onTabPress={onTabPress}
+          activeTabOffset={activeTabOffset}
+          activeTabWidth={activeTabWidth}
+          tabContainerWidths={tabContainerWidths}
+          onTabLayout={onTabLayout}
+          config={{
+            indicatorColor: '#1475BA',
+            containerClassName: 'mx-4 mb-4', // 👈 Tambah margin bottom
+            containerStyle: {
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 4,
+              elevation: 3,
+            },
+            textStyle: {
+              fontFamily: 'LexBold',
+              fontSize: 16,
+            },
+            activeTextStyle: {
+              fontFamily: 'LexBold',
+            },
+            minTabWidth: 100,
+          }}
+        />
       </View>
 
       <ScrollView
@@ -66,8 +83,7 @@ export default function Product() {
         showsVerticalScrollIndicator={false}
         className="bg-[#A7CBE5]"
       >
-        {/* INFO SEARCH */}
-        {searchQuery && searchQuery.trim() !== '' && (
+        {searchQuery.trim().length > 0 && (
           <View className="mx-4 mb-2 self-center rounded-lg bg-blue-100 px-4 py-2">
             <Text
               style={{ fontFamily: 'LexMedium' }}
@@ -80,7 +96,6 @@ export default function Product() {
           </View>
         )}
 
-        {/* DAFTAR PRODUK */}
         {searchedProducts.length > 0 ? (
           searchedProducts.map((item, idx) => (
             <View
@@ -92,7 +107,7 @@ export default function Product() {
                   source={require('@/assets/images/ProductScreen/bg-icon.png')}
                   className="h-full w-full rounded-[20px] object-cover"
                 />
-                <View className="absolute bottom-0 left-0 right-0 top-0 flex items-center justify-center">
+                <View className="absolute inset-0 flex items-center justify-center">
                   {item.icon}
                 </View>
               </View>
@@ -114,7 +129,7 @@ export default function Product() {
                 onPress={() =>
                   router.push({
                     pathname: item.pathname,
-                    params: { category: item.paramCategory as ProductType },
+                    params: { category: item.paramCategory },
                   })
                 }
               >
@@ -123,14 +138,13 @@ export default function Product() {
             </View>
           ))
         ) : (
-          // EMPTY STATE JIKA TIDAK ADA PRODUK
           <View className="flex-1 items-center justify-center py-10">
             <Text
               style={{ fontFamily: 'LexMedium' }}
               className="text-center text-lg text-black"
             >
-              {activeCategory !== 'Semua'
-                ? `Tidak ada produk di kategori ${activeCategory}`
+              {activeTab !== 'Semua'
+                ? `Tidak ada produk di kategori ${activeTab}`
                 : 'Tidak ada produk yang tersedia'}
             </Text>
           </View>

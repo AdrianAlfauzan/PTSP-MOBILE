@@ -8,38 +8,31 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 
-// OUR COMPONENTS
+// COMPONENTS
 import ButtonCustom from '@/components/buttonCustom';
 import ButtonShopAndChat from '@/components/buttonShopAndChat';
 
-// OUR CONSTANTS
+// CONSTANTS
 import { navbarTitleScreenMap } from '@/constants/navbarScreenTitles';
 
-// OUR CONTEXT
+// CONTEXT ✅ — SEKARANG PAKAI useSearch LANGSUNG
 import { useNavbarContext } from '@/context/NavbarContext';
+import { useSearch } from '@/context/SearchContext'; // 🔥 tambahkan ini
 
-// OUR INTERFACE
+// INTERFACE — HAPUS props search
 import { ButtonCustomProps } from '@/interfaces/buttonCustomProps';
 
 export default function NavbarForScreens({
   subText,
   textClassName,
   isTouchable = true,
-  searchQuery = '',
-  onSearchChange,
-  onSearchSubmit,
 }: ButtonCustomProps) {
   const router = useRouter();
   const pathname = usePathname();
   const { stationName } = useNavbarContext();
-
-  // ✅ LOCAL STATE UNTUK TEXTINPUT
-  const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery);
-
-  // ✅ CLEAR LOCAL STATE KETIKA SEARCH QUERY DI-CLEAR DARI PARENT
-  useEffect(() => {
-    setLocalSearchQuery(searchQuery);
-  }, [searchQuery]);
+  
+  // ✅ Ambil search dari context — seperti NavbarForTabs
+  const { searchQuery, setSearchQuery } = useSearch();
 
   const getCurrentTitle = (pathname: string) =>
     Object.entries(navbarTitleScreenMap).find(([path]) =>
@@ -52,18 +45,20 @@ export default function NavbarForScreens({
     '/screens/productDetailScreen'
   );
 
-  const handleSearchSubmit = () => {
-    if (onSearchSubmit) {
-      onSearchSubmit();
-    }
-  };
+  // ✅ LOCAL STATE UNTUK UX SMOOTH (opsional tapi bagus)
+  const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery);
 
-  // REAL-TIME SEARCH SAAT TYPING
+  useEffect(() => {
+    setLocalSearchQuery(searchQuery);
+  }, [searchQuery]);
+
   const handleSearchChange = (query: string) => {
     setLocalSearchQuery(query);
-    if (onSearchChange) {
-      onSearchChange(query);
-    }
+    setSearchQuery(query); // 🔥 update context
+  };
+
+  const handleSearchSubmit = () => {
+    console.log('🔍 Cari di detail:', searchQuery);
   };
 
   return (
@@ -76,7 +71,6 @@ export default function NavbarForScreens({
         paddingBottom: hp(2),
       }}
     >
-      {/* Baris pertama: tombol kembali + judul + tombol kanan */}
       <View className="flex-row items-center justify-between">
         <View style={{ flex: 1 }}>
           <ButtonCustom
@@ -109,12 +103,10 @@ export default function NavbarForScreens({
             </Text>
           )}
         </View>
-
-        {/* Tombol Shop & Chat */}
         <ButtonShopAndChat />
       </View>
 
-      {/* Baris kedua: Search bar khusus halaman Detail Produk */}
+      {/* Search bar hanya di halaman detail produk */}
       {isDetailProductPage && (
         <View
           className="mt-3 flex-row items-center rounded-full bg-white"

@@ -1,25 +1,101 @@
-import { useState, useRef, useEffect } from 'react';
-import { Animated, LayoutChangeEvent } from 'react-native';
+// hooks/Frontend/useAnimatedTab/useTabAnimation.ts
+import { useState, useEffect, useRef } from 'react';
+import { LayoutChangeEvent, Animated } from 'react-native';
+import {
+  TabAnimationConfig,
+  TabAnimationHookReturn,
+} from '@/interfaces/tabAnimation';
 
 export function useTabAnimation<GenericType extends string>(
   tabs: readonly GenericType[],
-  initialTab: GenericType
-) {
+  initialTab: GenericType,
+  config: TabAnimationConfig = {}
+): TabAnimationHookReturn<GenericType> {
+  const { tension = 80, friction = 8, useNativeDriver = false } = config;
+
   const [activeTab, setActiveTab] = useState<GenericType>(initialTab);
-  const [tabWidth, setTabWidth] = useState(0);
-  const translateX = useRef(new Animated.Value(0)).current;
+  const [tabContainerWidths, setTabContainerWidths] = useState<{
+    [key in GenericType]?: number;
+  }>({});
+
+  // Gunakan Animated.Value untuk smooth animation
+  const activeTabOffset = useRef(new Animated.Value(0)).current;
+  const activeTabWidth = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    const index = tabs.indexOf(activeTab);
-    Animated.spring(translateX, {
-      toValue: index * tabWidth,
-      useNativeDriver: true,
-    }).start();
-  }, [activeTab, tabWidth, translateX, tabs]);
+    let currentOffset = 0;
+    let found = false;
 
-  const onTabPress = (tab: GenericType) => setActiveTab(tab);
-  const onLayoutParent = (e: LayoutChangeEvent) =>
-    setTabWidth(e.nativeEvent.layout.width / tabs.length);
+    tabs.forEach((tab) => {
+      const tabWidth = tabContainerWidths[tab] || 0;
 
-  return { activeTab, translateX, tabWidth, onTabPress, onLayoutParent };
+      if (tab === activeTab) {
+        // Animasikan perpindahan dengan spring effect
+        Animated.parallel([
+          Animated.spring(activeTabOffset, {
+            toValue: currentOffset,
+            useNativeDriver,
+            tension,
+            friction,
+          }),
+          Animated.spring(activeTabWidth, {
+            toValue: tabWidth,
+            useNativeDriver,
+            tension,
+            friction,
+          }),
+        ]).start();
+        found = true;
+      }
+
+      currentOffset += tabWidth;
+    });
+
+    if (!found) {
+      Animated.parallel([
+        Animated.spring(activeTabOffset, {
+          toValue: 0,
+          useNativeDriver,
+          tension,
+          friction,
+        }),
+        Animated.spring(activeTabWidth, {
+          toValue: 0,
+          useNativeDriver,
+          tension,
+          friction,
+        }),
+      ]).start();
+    }
+  }, [
+    activeTab,
+    tabContainerWidths,
+    tabs,
+    tension,
+    friction,
+    useNativeDriver,
+    activeTabOffset,
+    activeTabWidth,
+  ]);
+
+  const onTabPress = (tab: GenericType) => {
+    setActiveTab(tab);
+  };
+
+  const onTabLayout = (tab: GenericType, event: LayoutChangeEvent) => {
+    const { width } = event.nativeEvent.layout;
+    setTabContainerWidths((prev) => {
+      if (prev[tab] === width) return prev;
+      return { ...prev, [tab]: width };
+    });
+  };
+
+  return {
+    activeTab,
+    activeTabOffset,
+    activeTabWidth,
+    tabContainerWidths,
+    onTabPress,
+    onTabLayout,
+  };
 }

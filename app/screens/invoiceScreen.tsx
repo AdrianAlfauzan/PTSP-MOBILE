@@ -6,7 +6,6 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-  Animated,
   Image,
   ActivityIndicator,
 } from 'react-native';
@@ -21,6 +20,7 @@ import { FilePreviewModalAll } from '@/components/filePreviewModalAll';
 
 // OUR CONSTANTS
 import { invoiceTabs } from '@/constants/invoiceTabs';
+import AnimatedTabBar from '@/components/animatedTabBar';
 
 // HOOKS
 import { useTabAnimation } from '@/hooks/Frontend/useAnimatedTab/useTabAnimation';
@@ -31,8 +31,14 @@ import { useGenerateInvoicePDF } from '@/hooks/Frontend/generatePDF/useGenerateI
 import { getCategoryIcon } from '@/components/getCategoryIcon';
 
 export default function InvoiceScreen() {
-  const { activeTab, translateX, tabWidth, onTabPress, onLayoutParent } =
-    useTabAnimation(invoiceTabs, 'Pemesan');
+  const {
+    activeTab,
+    activeTabOffset,
+    activeTabWidth,
+    onTabPress,
+    onTabLayout,
+    tabContainerWidths,
+  } = useTabAnimation(invoiceTabs, 'Pemesan');
   const [expandedItems, setExpandedItems] = useState<{
     [key: number]: boolean;
   }>({});
@@ -99,45 +105,15 @@ export default function InvoiceScreen() {
       </View>
 
       {/* Filter Tabs */}
-      <View className="mx-4 my-1 rounded-2xl bg-gray-100 p-2">
-        <View className="overflow-hidden rounded-2xl">
-          <View className="flex-row" onLayout={onLayoutParent}>
-            {/* Indicator */}
-            {tabWidth > 0 && (
-              <Animated.View
-                style={{
-                  position: 'absolute',
-                  width: tabWidth,
-                  height: '100%',
-                  backgroundColor: '#1475BA',
-                  borderRadius: 16,
-                  transform: [{ translateX }],
-                }}
-              />
-            )}
-
-            {invoiceTabs.map((tab) => {
-              const isActive = activeTab === tab;
-              return (
-                <TouchableOpacity
-                  key={tab}
-                  onPress={() => onTabPress(tab)}
-                  style={{ flex: 1, alignItems: 'center', paddingVertical: 12 }}
-                >
-                  <Text
-                    style={{
-                      color: isActive ? 'white' : 'black',
-                      fontWeight: isActive ? 'bold' : 'normal',
-                    }}
-                  >
-                    {tab}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        </View>
-      </View>
+      <AnimatedTabBar
+        tabs={invoiceTabs}
+        activeTab={activeTab}
+        onTabPress={onTabPress}
+        activeTabOffset={activeTabOffset}
+        activeTabWidth={activeTabWidth}
+        tabContainerWidths={tabContainerWidths}
+        onTabLayout={onTabLayout}
+      />
 
       {/* CONTENTS */}
       <View className="bg-[#A7CBE5] p-4">

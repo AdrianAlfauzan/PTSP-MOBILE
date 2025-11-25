@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 
-// ✅ SIMPLIFIED GLOBAL STATE - FIX RETURN TYPE
+//  SIMPLIFIED GLOBAL STATE - FIX RETURN TYPE
 const createGlobalSearchState = () => {
   let query = '';
   const listeners = new Set<(query: string) => void>();
@@ -12,7 +12,7 @@ const createGlobalSearchState = () => {
       if (query === newQuery) return;
 
       query = newQuery;
-      // ✅ IMMEDIATE UPDATE TO ALL LISTENERS
+      //  IMMEDIATE UPDATE TO ALL LISTENERS
       listeners.forEach((listener) => {
         try {
           listener(newQuery);
@@ -26,13 +26,13 @@ const createGlobalSearchState = () => {
     subscribe: (listener: (query: string) => void) => {
       listeners.add(listener);
 
-      // ✅ FIX: RETURN VOID FUNCTION, NOT BOOLEAN
+      //  FIX: RETURN VOID FUNCTION, NOT BOOLEAN
       return () => {
         listeners.delete(listener);
       };
     },
 
-    // ✅ DEBUG UTILITY
+    //  DEBUG UTILITY
     debug: () => {
       console.log('🔍 [GlobalState] Current state:', {
         query,
@@ -70,7 +70,7 @@ export function useGlobalSearch<T>(
     autoClearOnUnmount = false,
   } = config;
 
-  // ✅ DEFAULT FILTER FUNCTION
+  //  DEFAULT FILTER FUNCTION
   const defaultFilterFn = useCallback(
     (item: T, query: string): boolean => {
       if (!query.trim() || searchFields.length === 0) return true;
@@ -89,7 +89,7 @@ export function useGlobalSearch<T>(
 
   const actualFilterFn = filterFn || defaultFilterFn;
 
-  // ✅ GENERIC FILTERING
+  //  GENERIC FILTERING
   const filteredData = useMemo(() => {
     if (!enabled) return data;
 
@@ -106,7 +106,7 @@ export function useGlobalSearch<T>(
     }
   }, [searchQuery, data, enabled, actualFilterFn]);
 
-  // ✅ UPDATE SEARCH QUERY
+  //  UPDATE SEARCH QUERY
   const updateSearchQuery = useCallback(
     (query: string) => {
       if (!enabled) return;
@@ -129,7 +129,7 @@ export function useGlobalSearch<T>(
     updateSearchQuery('');
   }, [updateSearchQuery]);
 
-  // ✅ EFFECT UNTUK SUBSCRIBE GLOBAL SEARCH - FIXED RETURN TYPE
+  //  EFFECT UNTUK SUBSCRIBE GLOBAL SEARCH - FIXED RETURN TYPE
   useEffect(() => {
     if (!enabled) return;
 
@@ -137,11 +137,11 @@ export function useGlobalSearch<T>(
       setSearchQuery(newQuery);
     });
 
-    // ✅ FIX: RETURN UNSUBSCRIBE FUNCTION (VOID)
+    //  FIX: RETURN UNSUBSCRIBE FUNCTION (VOID)
     return unsubscribe;
   }, [enabled]);
 
-  // ✅ AUTO-CLEAR EFFECT - INTEGRATED DI HOOK INI!
+  //  AUTO-CLEAR EFFECT - INTEGRATED DI HOOK INI!
   useEffect(() => {
     if (autoClearOnUnmount) {
       return () => {
@@ -165,7 +165,7 @@ export function useGlobalSearch<T>(
   };
 }
 
-// ✅ UTILITY FUNCTIONS
+//  UTILITY FUNCTIONS
 export const searchUtils = {
   getCurrentQuery: () => globalSearch.getQuery(),
   clearGlobalSearch: () => globalSearch.setQuery(''),
