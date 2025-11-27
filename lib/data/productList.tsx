@@ -1,10 +1,14 @@
 // app/data/productList.tsx
 import React from 'react';
+
+// OUR ICONS
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import Feather from '@expo/vector-icons/Feather';
+
+// OUR INTERFACES
 import { ProductType } from '@/interfaces/productDataProps';
 
-export const allProducts = [
+export const productList = [
   {
     category: 'Informasi',
     icon: <FontAwesome6 name="mountain" size={50} color="white" />,

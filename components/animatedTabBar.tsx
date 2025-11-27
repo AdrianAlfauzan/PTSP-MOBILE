@@ -1,4 +1,3 @@
-// components/AnimatedTabBar.tsx
 import React, { useRef, useEffect, useState } from 'react';
 import {
   View,
@@ -8,10 +7,11 @@ import {
   LayoutChangeEvent,
   Animated,
 } from 'react-native';
-import { AnimatedTabBarConfig } from '@/interfaces/tabAnimation';
+
+// OUR INTERFACES
+import { AnimatedTabBarConfig } from '@/interfaces/tabAnimationProps';
 
 interface AnimatedTabBarProps<T extends string> {
-  // Required props
   tabs: readonly T[];
   activeTab: T;
   onTabPress: (tab: T) => void;
@@ -19,13 +19,10 @@ interface AnimatedTabBarProps<T extends string> {
   activeTabWidth: Animated.Value;
   tabContainerWidths: { [key in T]?: number };
   onTabLayout: (tab: T, event: LayoutChangeEvent) => void;
-
-  // Combined config props
-  config?: AnimatedTabBarConfig<T>;
+  tabBarStyleConfig?: AnimatedTabBarConfig<T>;
 }
 
 export default function AnimatedTabBar<T extends string>({
-  // Required props
   tabs,
   activeTab,
   onTabPress,
@@ -33,50 +30,36 @@ export default function AnimatedTabBar<T extends string>({
   activeTabWidth,
   tabContainerWidths,
   onTabLayout,
-
-  // Customization
-  config = {},
+  tabBarStyleConfig = {},
 }: AnimatedTabBarProps<T>) {
   const {
-    // Animation & Style
     indicatorColor = '#1475BA',
     containerClassName = '',
-
-    // Layout
     containerStyle,
     tabContainerStyle,
     tabStyle,
     activeTabStyle,
-
-    // Text
     textStyle,
     activeTextStyle,
-
-    // Behavior
     minTabWidth = 80,
     maxTabWidth = 200,
     enableScroll = true,
     centerTabs = true,
-
-    // Render functions
     renderTab,
     renderIndicator,
-  } = config;
+  } = tabBarStyleConfig;
 
   const scrollViewRef = useRef<ScrollView>(null);
   const [containerWidth, setContainerWidth] = useState(0);
 
-  // Hitung total width semua tab
   const totalTabsWidth = tabs.reduce(
     (sum, tab) => sum + (tabContainerWidths[tab] || 0),
     0
   );
 
-  // Tentukan mode: flex untuk tab sedikit, scroll untuk tab banyak
   const useFlexMode = centerTabs && totalTabsWidth < containerWidth;
 
   useEffect(() => {
-    // Hanya scroll jika dalam scroll mode dan enableScroll true
     if (
       enableScroll &&
       !useFlexMode &&
@@ -100,7 +83,6 @@ export default function AnimatedTabBar<T extends string>({
     setContainerWidth(width);
   };
 
-  // Default Indicator Render
   const defaultRenderIndicator = (
     width: Animated.Value,
     offset: Animated.Value
@@ -120,7 +102,6 @@ export default function AnimatedTabBar<T extends string>({
     />
   );
 
-  // Default Tab Render
   const defaultRenderTab = (tab: T, isActive: boolean) => (
     <Text
       style={[
@@ -140,23 +121,20 @@ export default function AnimatedTabBar<T extends string>({
     </Text>
   );
 
-  // 🎯 FLEX MODE - Untuk tab sedikit (2, 3, 4 tab)
   if (useFlexMode && containerWidth > 0) {
     return (
       <View
         style={containerStyle}
-        className={`mx-4 my-1 rounded-2xl bg-gray-100 p-2 ${containerClassName}`}
+        className={`mx-4 my-1 rounded-2xl bg-gray-100 ${containerClassName}`}
         onLayout={handleContainerLayout}
       >
         <View
           style={[{ overflow: 'hidden', borderRadius: 16 }, tabContainerStyle]}
         >
-          {/* Custom atau Default Indicator */}
           {renderIndicator
             ? renderIndicator(activeTabWidth, activeTabOffset)
             : defaultRenderIndicator(activeTabWidth, activeTabOffset)}
 
-          {/* Flex Container - Membagi lebar sama rata */}
           <View style={{ flexDirection: 'row' }}>
             {tabs.map((tab) => {
               const isActive = activeTab === tab;
@@ -191,11 +169,10 @@ export default function AnimatedTabBar<T extends string>({
     );
   }
 
-  // 🎯 SCROLL MODE - Untuk tab banyak (5+ tab) atau centerTabs=false
   return (
     <View
       style={containerStyle}
-      className={`mx-4 my-1 rounded-2xl bg-gray-100 p-2 ${containerClassName}`}
+      className={`mx-4 my-1 rounded-2xl bg-gray-100 ${containerClassName}`}
       onLayout={handleContainerLayout}
     >
       <View
@@ -212,12 +189,10 @@ export default function AnimatedTabBar<T extends string>({
               : { flexGrow: 1 }
           }
         >
-          {/* Custom atau Default Indicator */}
           {renderIndicator
             ? renderIndicator(activeTabWidth, activeTabOffset)
             : defaultRenderIndicator(activeTabWidth, activeTabOffset)}
 
-          {/* Tab Buttons */}
           {tabs.map((tab) => {
             const isActive = activeTab === tab;
             return (

@@ -1,15 +1,17 @@
 // hooks/Frontend/useAnimatedTab/useTabAnimation.ts
 import { useState, useEffect, useRef } from 'react';
 import { LayoutChangeEvent, Animated } from 'react-native';
+
+// OUR INTERFACES
 import {
-  TabAnimationConfig,
+  TabAnimationProps,
   TabAnimationHookReturn,
-} from '@/interfaces/tabAnimation';
+} from '@/interfaces/tabAnimationProps';
 
 export function useTabAnimation<GenericType extends string>(
   tabs: readonly GenericType[],
   initialTab: GenericType,
-  config: TabAnimationConfig = {}
+  config: TabAnimationProps = {}
 ): TabAnimationHookReturn<GenericType> {
   const { tension = 80, friction = 8, useNativeDriver = false } = config;
 

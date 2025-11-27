@@ -1,4 +1,4 @@
-// types/tabAnimation.ts
+import React, { ReactNode } from 'react';
 import {
   StyleProp,
   TextStyle,
@@ -7,7 +7,7 @@ import {
   Animated,
 } from 'react-native';
 
-export interface TabAnimationConfig {
+export interface TabAnimationProps {
   indicatorColor?: string;
   containerClassName?: string;
   tension?: number;
@@ -34,7 +34,7 @@ export interface TabBarCustomizationProps {
 }
 
 export interface TabBarRenderProps<T extends string> {
-  renderTab?: (tab: T, isActive: boolean) => React.ReactNode;
+  renderTab?: (tab: T, isActive: boolean) => ReactNode;
   renderIndicator?: (
     width: Animated.Value,
     offset: Animated.Value
@@ -51,6 +51,6 @@ export type TabAnimationHookReturn<T extends string> = {
 };
 
 // Combined config type for AnimatedTabBar
-export type AnimatedTabBarConfig<T extends string> = TabAnimationConfig &
+export type AnimatedTabBarConfig<T extends string> = TabAnimationProps &
   TabBarCustomizationProps &
   TabBarRenderProps<T>;
