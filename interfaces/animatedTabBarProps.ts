@@ -7,7 +7,7 @@ import {
   Animated,
 } from 'react-native';
 
-export interface TabAnimationProps {
+export interface AnimatedTabBarProps {
   indicatorColor?: string;
   containerClassName?: string;
   tension?: number;
@@ -51,6 +51,6 @@ export type TabAnimationHookReturn<T extends string> = {
 };
 
 // Combined config type for AnimatedTabBar
-export type AnimatedTabBarConfig<T extends string> = TabAnimationProps &
+export type AnimatedTabBarConfig<T extends string> = AnimatedTabBarProps &
   TabBarCustomizationProps &
   TabBarRenderProps<T>;

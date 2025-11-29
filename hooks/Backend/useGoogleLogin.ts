@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
+
+// OUR LIBRARIES
 import {
   db,
   firebaseAuth,
@@ -9,22 +11,27 @@ import {
 } from '@/lib/firebase';
 import '@/lib/auth/googleConfig';
 
-// HOOKS & UTILS
-import { useInternetStatus } from '@/hooks/Backend/useInternetStatus';
+// OUR HOOKS
+import { useInternetStatusContext } from '@/context/InternetStatusContext';
+
+// OUR UTILS
 import { showAlertMessage } from '@/utils/showAlertMessage';
 
 export const useGoogleLogin = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const { isConnected } = useInternetStatus(); // 🌐 Pantau status internet realtime
+  const { isConnected } = useInternetStatusContext();
 
+  // Cek apakah user sudah terdaftar di Firestore
   const checkUserRegistration = async (uid: string) => {
     const peroranganRef = db.collection('perorangan').doc(uid);
     const perusahaanRef = db.collection('perusahaan').doc(uid);
+
     const [peroranganDoc, perusahaanDoc] = await Promise.all([
       peroranganRef.get(),
       perusahaanRef.get(),
     ]);
+
     if (peroranganDoc.exists()) return 'perorangan';
     if (perusahaanDoc.exists()) return 'perusahaan';
     return null;
@@ -32,11 +39,11 @@ export const useGoogleLogin = () => {
 
   const signIn = async () => {
     try {
-      // 🚫 Jika tidak ada koneksi internet, hentikan proses
+      // Cek koneksi internet
       if (!isConnected) {
         await showAlertMessage(
           'Tidak Ada Koneksi Internet',
-          'Periksa Wi-Fi atau Data Seluler Anda sebelum mencoba login.',
+          'Periksa Wi-Fi atau Data Seluler Anda sebelum login.',
           'error'
         );
         return;
@@ -44,7 +51,7 @@ export const useGoogleLogin = () => {
 
       setLoading(true);
 
-      // 🟡 Alert loading
+      // Alert loading sementara
       await showAlertMessage(
         'Memproses Login...',
         'Mohon tunggu sebentar',
@@ -52,7 +59,7 @@ export const useGoogleLogin = () => {
         { duration: 3000 }
       );
 
-      // ⏳ Delay supaya terasa “loading” di UI
+      // Delay supaya terlihat loading
       await new Promise((resolve) => setTimeout(resolve, 3000));
 
       // Step 1: Google Sign-In
@@ -94,6 +101,7 @@ export const useGoogleLogin = () => {
           `Selamat datang kembali, ${fullName}`,
           'success'
         );
+
         router.replace('/(tabs)/home');
       } else {
         await showAlertMessage(

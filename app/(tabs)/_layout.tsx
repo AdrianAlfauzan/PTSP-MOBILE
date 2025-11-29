@@ -1,43 +1,36 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text } from 'react-native';
 
-// OUR COMPONENTS
-import NavbarForTabs from '@/components/navbarForTabs';
-import TabNavigator from '@/components/TabNavigator';
-
-// OUR CONTEXT
+// OUR CONTEXTS
 import { SearchProvider } from '@/context/SearchContext';
+import { useInternetStatusContext } from '@/context/InternetStatusContext';
+
+// OUR COMPONENTS
+import TabNavigator from '@/components/TabNavigator';
+import NavbarForTabs from '@/components/navbarForTabs';
 
 // OUR HOOKS
-import { useInternetStatus } from '@/hooks/Backend/useInternetStatus';
 import useNavbarVisibility from '@/hooks/Frontend/useNavbarVisibility';
 
 export default function TabsLayout() {
   const { showNavbar } = useNavbarVisibility();
-  const { isConnected } = useInternetStatus();
+  const { isConnected, justReconnected } = useInternetStatusContext(); // sudah ada context dari RootLayout
   const [showReconnected, setShowReconnected] = useState(false);
 
-  // Munculkan notifikasi "Koneksi berhasil kembali" hanya sebentar
   useEffect(() => {
-    if (isConnected) {
+    if (justReconnected) {
       setShowReconnected(true);
-
-      const timer = setTimeout(() => {
-        setShowReconnected(false);
-      }, 3000);
-
+      const timer = setTimeout(() => setShowReconnected(false), 3000);
       return () => clearTimeout(timer);
     }
-  }, [isConnected]);
+  }, [justReconnected]);
 
   return (
     <SearchProvider>
       <View className="flex-1">
         {showNavbar && <NavbarForTabs />}
-
         <TabNavigator />
 
-        {/* Jika tidak ada koneksi */}
         {!isConnected && (
           <View
             className="absolute bottom-0 w-full bg-red-600 p-2"
@@ -49,7 +42,6 @@ export default function TabsLayout() {
           </View>
         )}
 
-        {/* Jika koneksi baru saja pulih */}
         {showReconnected && (
           <View
             className="absolute bottom-0 w-full bg-green-600 p-2"

@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 
 // OUR INTERFACES
-import { AnimatedTabBarConfig } from '@/interfaces/tabAnimationProps';
+import { AnimatedTabBarConfig } from '@/interfaces/animatedTabBarProps';
 
 interface AnimatedTabBarProps<T extends string> {
   tabs: readonly T[];

@@ -1,23 +1,23 @@
 // screens/Product.tsx
 import React, { useMemo } from 'react';
-import { View, Text, ScrollView, Image } from 'react-native';
+import { View, Text, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 
 // COMPONENTS
-import Button from '@/components/button';
 import AnimatedTabBar from '@/components/animatedTabBar';
+import { ProductSection } from '@/components/Product/ProductSection';
+import ProductPrioritySection from '@/components/Product/ProductPrioritySection';
 
-// OUR CONSTANTS
+// CONSTANTS
 import { productTabs } from '@/constants/productTabs';
 
 // HOOKS
 import { useTabAnimation } from '@/hooks/Frontend/useAnimatedTab/useTabAnimation';
 import { useSkeletonForTab } from '@/hooks/Frontend/skeletons/useSkeletonForTab';
+import { useGetProductsByCategory } from '@/hooks/Backend/useGetProductsByCategory';
+import { useAddToCart } from '@/hooks/Backend/useAddToCart';
 
-// SKELETON
-import { WrapperSkeletonProductTab } from '@/components/skeletons/wrapperSkeletonProductTab';
-
-// DATA
+// OUR LIBRARIES
 import { productList } from '@/lib/data/productList';
 
 // CONTEXT
@@ -36,21 +36,27 @@ export default function Product() {
     onTabLayout,
     tabContainerWidths,
   } = useTabAnimation(productTabs, 'Semua');
+  const { addToCart, loadingAddToCart } = useAddToCart();
 
   // Skeleton loading
   const showSkeleton = useSkeletonForTab(activeTab);
 
-  // --- FILTER BERDASARKAN TAB ---
+  // ================= BACKEND PRIORITAS ==================
+  const { products, loading, icon, ownerName } =
+    useGetProductsByCategory('Prioritas');
+
+  // ================= FRONTEND FILTERING ==================
   const filteredByCategory = useMemo(() => {
     return activeTab === 'Semua'
       ? productList
       : productList.filter((item) => item.category === activeTab);
   }, [activeTab]);
 
-  // --- FILTER BERDASARKAN SEARCH ---
   const searchedProducts = useMemo(() => {
     if (!searchQuery.trim()) return filteredByCategory;
+
     const q = searchQuery.toLowerCase();
+
     return filteredByCategory.filter(
       (item) =>
         item.title.toLowerCase().includes(q) ||
@@ -59,7 +65,6 @@ export default function Product() {
     );
   }, [filteredByCategory, searchQuery]);
 
-  // --- UTILITY: FILTER BERDASARKAN CATEGORY DAN SEARCH UNTUK "Semua" ---
   const informasiProducts = useMemo(() => {
     return searchedProducts.filter((item) => item.category === 'Informasi');
   }, [searchedProducts]);
@@ -70,7 +75,7 @@ export default function Product() {
 
   return (
     <View className="flex-1">
-      {/* Animated Tab Bar */}
+      {/* TAB */}
       <View className="bg-[#A7CBE5] pb-1 pt-2">
         <AnimatedTabBar
           tabs={productTabs}
@@ -102,12 +107,13 @@ export default function Product() {
         />
       </View>
 
+      {/* CONTENT */}
       <ScrollView
         contentContainerStyle={{ paddingBottom: 100 }}
         className="bg-[#A7CBE5]"
         showsVerticalScrollIndicator={false}
       >
-        {/* ================= SEARCH INFO ================= */}
+        {/* SEARCH INFO */}
         {searchQuery.trim().length > 0 && (
           <View className="mx-4 mb-2 self-center rounded-lg bg-blue-100 px-4 py-2">
             <Text
@@ -121,256 +127,58 @@ export default function Product() {
           </View>
         )}
 
-        {/* =============== ALL PRODUK =============== */}
+        {/* ====================== SEMUA ====================== */}
         {activeTab === 'Semua' && (
-          <View className="">
-            {showSkeleton ? (
-              <WrapperSkeletonProductTab />
-            ) : (
-              <>
-                {/* --- PRODUK INFORMASI --- */}
-                <SectionTitle title="Produk Informasi" />
+          <>
+            <ProductSection
+              title="Produk Informasi"
+              products={informasiProducts}
+              showSkeleton={showSkeleton}
+              router={router}
+            />
 
-                {informasiProducts.map((item, idx) => (
-                  <View
-                    key={idx}
-                    className="mt-3 h-auto w-[74%] self-center rounded-[15px] border-2 border-b-[4px] border-x-black/5 border-b-black/10 border-t-black/5 bg-white p-3.5"
-                  >
-                    {/* IMAGE */}
-                    <View className="h-[125px] w-full shadow-xl">
-                      <Image
-                        source={require('@/assets/images/ProductScreen/bg-icon.png')}
-                        className="h-full w-full rounded-[20px]"
-                      />
-                      <View className="absolute inset-0 items-center justify-center">
-                        {item.icon}
-                      </View>
-                    </View>
-
-                    {/* TITLE */}
-                    <Text
-                      style={{ fontFamily: 'LexBold' }}
-                      className="py-2 text-[20px]"
-                    >
-                      {item.title}
-                    </Text>
-
-                    {/* DESCRIPTION */}
-                    <Text
-                      style={{ fontFamily: 'LexRegular' }}
-                      className="pb-4 text-[12px]"
-                    >
-                      {item.desc}
-                    </Text>
-
-                    {/* BUTTON */}
-                    <Button
-                      style="bg-[#1475BA] px-6 py-2 rounded-lg"
-                      textStyle="text-sm text-white"
-                      onPress={() =>
-                        router.push({
-                          pathname: item.pathname,
-                          params: { category: item.paramCategory },
-                        })
-                      }
-                    >
-                      Lihat Produk
-                    </Button>
-                  </View>
-                ))}
-
-                {/* --- PRODUK JASA --- */}
-                <SectionTitle title="Produk Jasa" />
-
-                {jasaProducts.map((item, idx) => (
-                  <View
-                    key={idx}
-                    className="mt-3 h-auto w-[74%] self-center rounded-[15px] border-2 border-b-[4px] border-x-black/5 border-b-black/10 border-t-black/5 bg-white p-3.5"
-                  >
-                    {/* IMAGE */}
-                    <View className="h-[125px] w-full shadow-xl">
-                      <Image
-                        source={require('@/assets/images/ProductScreen/bg-icon.png')}
-                        className="h-full w-full rounded-[20px]"
-                      />
-                      <View className="absolute inset-0 items-center justify-center">
-                        {item.icon}
-                      </View>
-                    </View>
-
-                    {/* TITLE */}
-                    <Text
-                      style={{ fontFamily: 'LexBold' }}
-                      className="py-2 text-[20px]"
-                    >
-                      {item.title}
-                    </Text>
-
-                    {/* DESCRIPTION */}
-                    <Text
-                      style={{ fontFamily: 'LexRegular' }}
-                      className="pb-4 text-[12px]"
-                    >
-                      {item.desc}
-                    </Text>
-
-                    {/* BUTTON */}
-                    <Button
-                      style="bg-[#1475BA] px-6 py-2 rounded-lg"
-                      textStyle="text-sm text-white"
-                      onPress={() =>
-                        router.push({
-                          pathname: item.pathname,
-                          params: { category: item.paramCategory },
-                        })
-                      }
-                    >
-                      Lihat Produk
-                    </Button>
-                  </View>
-                ))}
-              </>
-            )}
-          </View>
+            <ProductSection
+              title="Produk Jasa"
+              products={jasaProducts}
+              showSkeleton={showSkeleton}
+              router={router}
+            />
+          </>
         )}
 
-        {/* =============== INFORMASI SAJA =============== */}
+        {/* ====================== INFORMASI ====================== */}
         {activeTab === 'Informasi' && (
-          <View className="">
-            {showSkeleton ? (
-              <WrapperSkeletonProductTab />
-            ) : (
-              <>
-                <SectionTitle title="Produk Informasi" />
-
-                {searchedProducts
-                  .filter((item) => item.category === 'Informasi')
-                  .map((item, idx) => (
-                    <View
-                      key={idx}
-                      className="mt-3 h-auto w-[74%] self-center rounded-[15px] border-2 border-b-[4px] border-x-black/5 border-b-black/10 border-t-black/5 bg-white p-3.5"
-                    >
-                      {/* IMAGE */}
-                      <View className="h-[125px] w-full shadow-xl">
-                        <Image
-                          source={require('@/assets/images/ProductScreen/bg-icon.png')}
-                          className="h-full w-full rounded-[20px] object-cover"
-                        />
-                        <View className="absolute inset-0 flex items-center justify-center">
-                          {item.icon}
-                        </View>
-                      </View>
-
-                      {/* TITLE */}
-                      <Text
-                        style={{ fontFamily: 'LexBold' }}
-                        className="py-2 text-[20px]"
-                      >
-                        {item.title}
-                      </Text>
-
-                      {/* DESC */}
-                      <Text
-                        style={{ fontFamily: 'LexRegular' }}
-                        className="pb-4 text-[12px]"
-                      >
-                        {item.desc}
-                      </Text>
-
-                      {/* BUTTON */}
-                      <Button
-                        style="bg-[#1475BA] px-6 py-2 rounded-lg"
-                        textStyle="text-sm text-white"
-                        onPress={() =>
-                          router.push({
-                            pathname: item.pathname,
-                            params: { category: item.paramCategory },
-                          })
-                        }
-                      >
-                        Lihat Produk
-                      </Button>
-                    </View>
-                  ))}
-              </>
-            )}
-          </View>
+          <ProductSection
+            title="Produk Informasi"
+            products={informasiProducts}
+            showSkeleton={showSkeleton}
+            router={router}
+          />
         )}
 
-        {/* =============== JASA SAJA =============== */}
+        {/* ====================== JASA ====================== */}
         {activeTab === 'Jasa' && (
-          <View className="">
-            {showSkeleton ? (
-              <WrapperSkeletonProductTab />
-            ) : (
-              <>
-                <SectionTitle title="Produk Jasa" />
+          <ProductSection
+            title="Produk Jasa"
+            products={jasaProducts}
+            showSkeleton={showSkeleton}
+            router={router}
+          />
+        )}
 
-                {searchedProducts
-                  .filter((item) => item.category === 'Jasa')
-                  .map((item, idx) => (
-                    <View
-                      key={idx}
-                      className="mt-3 h-auto w-[74%] self-center rounded-[15px] border-2 border-b-[4px] border-x-black/5 border-b-black/10 border-t-black/5 bg-white p-3.5"
-                    >
-                      {/* IMAGE */}
-                      <View className="h-[125px] w-full shadow-xl">
-                        <Image
-                          source={require('@/assets/images/ProductScreen/bg-icon.png')}
-                          className="h-full w-full rounded-[20px] object-cover"
-                        />
-                        <View className="absolute inset-0 flex items-center justify-center">
-                          {item.icon}
-                        </View>
-                      </View>
-
-                      {/* TITLE */}
-                      <Text
-                        style={{ fontFamily: 'LexBold' }}
-                        className="py-2 text-[20px]"
-                      >
-                        {item.title}
-                      </Text>
-
-                      {/* DESCRIPTION */}
-                      <Text
-                        style={{ fontFamily: 'LexRegular' }}
-                        className="pb-4 text-[12px]"
-                      >
-                        {item.desc}
-                      </Text>
-
-                      {/* BUTTON */}
-                      <Button
-                        style="bg-[#1475BA] px-6 py-2 rounded-lg"
-                        textStyle="text-sm text-white"
-                        onPress={() =>
-                          router.push({
-                            pathname: item.pathname,
-                            params: { category: item.paramCategory },
-                          })
-                        }
-                      >
-                        Lihat Produk
-                      </Button>
-                    </View>
-                  ))}
-              </>
-            )}
-          </View>
+        {/* ====================== PRIORITAS (BACKEND) ====================== */}
+        {activeTab === 'Prioritas' && (
+          <ProductPrioritySection
+            title="Produk Prioritas"
+            products={products}
+            loading={loading}
+            icon={icon}
+            ownerName={ownerName}
+            onAddToCart={(item) => addToCart(item, item.Status)}
+            loadingAddToCart={loadingAddToCart}
+          />
         )}
       </ScrollView>
     </View>
   );
 }
-
-// ==========================================
-// COMPONENT: SECTION TITLE
-// ==========================================
-const SectionTitle = ({ title }: { title: string }) => (
-  <View className="self-center py-1 pt-5">
-    <Text style={{ fontFamily: 'LexBold' }} className="text-[20px]">
-      {title}
-    </Text>
-  </View>
-);

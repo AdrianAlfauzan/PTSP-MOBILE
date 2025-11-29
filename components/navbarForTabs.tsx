@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Image, TextInput, TouchableOpacity } from 'react-native';
+import { View, Image, TextInput } from 'react-native';
 import Octicons from '@expo/vector-icons/Octicons';
 
 // OUR COMPONENTS
@@ -62,17 +62,15 @@ export default function NavbarForTabs() {
                   paddingVertical: 0,
                 }}
               />
-              <TouchableOpacity
-                activeOpacity={0.6}
-                className="rounded-full bg-[#72C02C]"
+              <View
                 style={{
                   paddingVertical: hp(0.8),
                   paddingHorizontal: wp(3),
                   marginRight: wp(1.5),
                 }}
               >
-                <Octicons name="search" size={wp(4.8)} color="white" />
-              </TouchableOpacity>
+                <Octicons name="search" size={wp(4.8)} color="black" />
+              </View>
             </View>
           ) : (
             <Image

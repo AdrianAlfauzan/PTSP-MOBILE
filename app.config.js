@@ -63,6 +63,8 @@ export default {
         projectId: '9b5ac92f-8879-418c-8ca2-a6a3201f5ded',
       },
       GOOGLE_WEB_CLIENT_ID: process.env.GOOGLE_WEB_CLIENT_ID,
+      GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+      GEMINI_MODEL: process.env.GEMINI_MODEL,
     },
   },
 };

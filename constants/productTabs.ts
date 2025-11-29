@@ -1,1 +1,1 @@
-export const productTabs = ['Semua', 'Informasi', 'Jasa'] as const;
+export const productTabs = ['Semua', 'Informasi', 'Jasa', 'Prioritas'] as const;

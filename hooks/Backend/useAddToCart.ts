@@ -3,12 +3,15 @@ import { db, firebaseAuth } from '@/lib/firebase';
 import { router } from 'expo-router';
 
 // OUR INTERFACES
-import { ProductData, ProductType } from '@/interfaces/productDataProps';
+import {
+  ProductDataBackendProps,
+  ProductType,
+} from '@/interfaces/product/productDataBackendProps';
 
 // OUR UTILS
 import { showAlertMessage } from '@/utils/showAlertMessage';
 
-type ProductDataForCart = ProductData;
+type ProductDataForCart = ProductDataBackendProps;
 
 export const useAddToCart = () => {
   const [loadingAddToCart, setLoadingAddToCart] = useState(false);
@@ -58,10 +61,10 @@ export const useAddToCart = () => {
         return;
       }
 
-      const productData: ProductData = {
+      const productData: ProductDataBackendProps = {
         id: productSnap.id,
         ...productRawData,
-      } as ProductData;
+      } as ProductDataBackendProps;
 
       const idField =
         lowercasedProductType === 'informasi' ? 'ID_Informasi' : 'ID_Jasa';

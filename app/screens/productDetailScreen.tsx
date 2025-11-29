@@ -3,22 +3,23 @@ import React, { useMemo } from 'react';
 import { View, Text, ScrollView, Image } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 
-// ICONS
-import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+// OUR ICONS
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
-// COMPONENTS
+// OUR COMPONENTS
 import Button from '@/components/button';
 import { ProductCardInfoButton } from '@/components/productCardInfoButton';
 
-// HOOKS
+// OUR CONTEXT
+import { useSearch } from '@/context/SearchContext';
+
+// OUR HOOKS
 import { useGetProductsByCategory } from '@/hooks/Backend/useGetProductsByCategory';
 import { usePopupDetailProductAnimation } from '@/hooks/Frontend/popUpInfoCard/usePopupDetailProductAnimation';
-import { useSearch } from '@/context/SearchContext';
 import { useAddToCart } from '@/hooks/Backend/useAddToCart';
 
-// INTERFACES
-import { ProductType } from '@/interfaces/productDataProps';
+// OUR INTERFACES
+import { ProductType } from '@/interfaces/product/productDataBackendProps';
 
 export default function ProductDetailScreen() {
   const params = useLocalSearchParams();
@@ -31,35 +32,22 @@ export default function ProductDetailScreen() {
   const productType = informationOrService[0] as ProductType;
   const categoryForIcon = informationOrService.slice(1).join('_');
 
-  const { products, ownerName, loading, error } =
+  const { products, ownerName, icon, loading, error } =
     useGetProductsByCategory(compositeCategory);
   const { activePopupIndex, togglePopup, closePopup, fadeAnim } =
     usePopupDetailProductAnimation();
   const { loadingAddToCart, addToCart } = useAddToCart();
 
-  const filteredProducts = useMemo(() => {
+  const searchedProducts = useMemo(() => {
     if (!searchQuery.trim()) return products || [];
     const q = searchQuery.toLowerCase();
     return (products || []).filter(
-      (p) =>
-        p.Nama.toLowerCase().includes(q) ||
-        (p.Deskripsi && p.Deskripsi.toLowerCase().includes(q)) ||
-        p.Pemilik.toLowerCase().includes(q)
+      (product) =>
+        product.Nama.toLowerCase().includes(q) ||
+        (product.Deskripsi && product.Deskripsi.toLowerCase().includes(q)) ||
+        product.Pemilik.toLowerCase().includes(q)
     );
   }, [products, searchQuery]);
-
-  const getCategoryIcon = (cat: string) => {
-    switch (cat) {
-      case 'Meteorologi':
-        return <FontAwesome6 name="mountain" size={60} color="white" />;
-      case 'Klimatologi':
-        return <FontAwesome6 name="cloud-bolt" size={60} color="white" />;
-      case 'Geofisika':
-        return <FontAwesome6 name="wind" size={60} color="white" />;
-      default:
-        return <FontAwesome6 name="info-circle" size={60} color="white" />;
-    }
-  };
 
   if (!compositeCategory) {
     return (
@@ -77,9 +65,7 @@ export default function ProductDetailScreen() {
         contentContainerStyle={{ paddingBottom: 100, paddingTop: 16 }}
         showsVerticalScrollIndicator={false}
         onScrollBeginDrag={() => {
-          if (activePopupIndex !== null) {
-            closePopup();
-          }
+          if (activePopupIndex !== null) closePopup();
         }}
       >
         {searchQuery.trim().length > 0 && (
@@ -88,8 +74,8 @@ export default function ProductDetailScreen() {
               style={{ fontFamily: 'LexMedium' }}
               className="text-lg text-blue-800"
             >
-              {filteredProducts.length > 0
-                ? `Ditemukan ${filteredProducts.length} produk untuk "${searchQuery}"`
+              {searchedProducts.length > 0
+                ? `Ditemukan ${searchedProducts.length} produk untuk "${searchQuery}"`
                 : `Tidak ada hasil untuk "${searchQuery}"`}
             </Text>
           </View>
@@ -109,21 +95,19 @@ export default function ProductDetailScreen() {
         </Text>
 
         {loading ? (
-          <>
-            {[...Array(3)].map((_, index) => (
-              <View
-                key={index}
-                className="my-3 items-center justify-center gap-6"
-              >
-                <View className="h-auto w-[74%] rounded-[15px] border-2 border-b-[4px] border-x-black/5 border-b-black/10 border-t-black/5 bg-white p-3.5">
-                  <View className="h-[200px] w-full animate-pulse rounded-[20px] bg-gray-200" />
-                  <View className="mt-4 h-4 w-40 animate-pulse self-center rounded bg-gray-200" />
-                  <View className="mt-3 h-4 w-24 animate-pulse self-center rounded bg-gray-200" />
-                  <View className="mt-5 h-10 w-56 animate-pulse self-center rounded-lg bg-gray-300" />
-                </View>
+          [...Array(3)].map((_, index) => (
+            <View
+              key={index}
+              className="my-3 items-center justify-center gap-6"
+            >
+              <View className="h-auto w-[74%] rounded-[15px] border-2 border-b-[4px] border-x-black/5 border-b-black/10 border-t-black/5 bg-white p-3.5">
+                <View className="h-[200px] w-full animate-pulse rounded-[20px] bg-gray-200" />
+                <View className="mt-4 h-4 w-40 animate-pulse self-center rounded bg-gray-200" />
+                <View className="mt-3 h-4 w-24 animate-pulse self-center rounded bg-gray-200" />
+                <View className="mt-5 h-10 w-56 animate-pulse self-center rounded-lg bg-gray-300" />
               </View>
-            ))}
-          </>
+            </View>
+          ))
         ) : error ? (
           <View className="self-center py-4">
             <Text
@@ -133,8 +117,8 @@ export default function ProductDetailScreen() {
               {error}
             </Text>
           </View>
-        ) : filteredProducts.length > 0 ? (
-          filteredProducts.map((item, index) => (
+        ) : searchedProducts.length > 0 ? (
+          searchedProducts.map((item, index) => (
             <View
               key={`${item.id}-${index}`}
               className="my-3 items-center justify-center gap-6"
@@ -154,7 +138,7 @@ export default function ProductDetailScreen() {
                     className="h-full w-full rounded-[20px] object-cover"
                   />
                   <View className="absolute inset-0 flex items-center justify-center gap-2 px-2">
-                    {getCategoryIcon(categoryForIcon)}
+                    {icon}
                     <Text
                       style={{ fontFamily: 'LexMedium' }}
                       className="text-md text-center font-semibold text-white"

@@ -1,87 +1,109 @@
-import { useEffect, useState } from 'react';
+// hooks/Backend/useGetProductsByCategory.ts
+import { useEffect, useState, ReactNode } from 'react';
 import { db } from '@/lib/firebase';
+import { productList } from '@/lib/data/productList';
+import { ProductDataBackendProps } from '@/interfaces/product/productDataBackendProps';
 
-// OUR INTERFACES
-import { ProductData } from '@/interfaces/productDataProps';
-
-export const useGetProductsByCategory = (compositeCategory: string) => {
-  const [products, setProducts] = useState<ProductData[]>([]);
-  const [ownerName, setOwnerName] = useState<string>('');
+export const useGetProductsByCategory = (category: string) => {
+  const [products, setProducts] = useState<ProductDataBackendProps[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [icon, setIcon] = useState<ReactNode>(null);
+  const [ownerName, setOwnerName] = useState<string>('');
+
   useEffect(() => {
     const fetchProducts = async () => {
-      if (!compositeCategory) {
-        setLoading(false);
-        setProducts([]);
-        setOwnerName('');
-        return;
-      }
-
       try {
         setLoading(true);
         setError(null);
 
-        const parts = compositeCategory.split('_');
-        if (parts.length < 2) {
-          console.error(`❌ Format kategori tidak valid: ${compositeCategory}`);
-          setError('Format kategori tidak valid.');
+        const lower = category.toLowerCase();
+
+        // ========== PRIORITAS & TERSEDIA ==============
+        let statusToFetch: string | null =
+          lower === 'prioritas'
+            ? 'Top'
+            : lower === 'tersedia'
+              ? 'Tersedia'
+              : null;
+
+        if (statusToFetch) {
+          let result: ProductDataBackendProps[] = [];
+
+          // Ambil dari informasi
+          const infoSnap = await db
+            .collection('informasi')
+            .where('Status', '==', statusToFetch)
+            .get();
+
+          infoSnap.forEach((doc) =>
+            result.push({ id: doc.id, ...(doc.data() as any) })
+          );
+
+          // Ambil dari jasa
+          const jasaSnap = await db
+            .collection('jasa')
+            .where('Status', '==', statusToFetch)
+            .get();
+
+          jasaSnap.forEach((doc) =>
+            result.push({ id: doc.id, ...(doc.data() as any) })
+          );
+
+          setProducts(result);
+
+          // Set icon & title (ambil dari productList berdasarkan Pemilik pertama)
+          const owner = result.length > 0 ? result[0].Pemilik : '';
+
+          const productInfo = productList.find(
+            (p) => p.paramCategory.split('_')[1] === owner
+          );
+
+          setIcon(productInfo?.icon || null);
+          setOwnerName(productInfo?.title || owner || '');
+
           setLoading(false);
           return;
         }
 
-        const productType = parts[0].toLowerCase();
-        const actualCategory = parts.slice(1).join('_');
+        // ========== KATEGORI BIASA ==============
+        const parts = category.split('_');
+        if (parts.length >= 2) {
+          const type = parts[0].toLowerCase();
+          const owner = parts.slice(1).join('_');
 
-        let collectionName;
-        if (productType === 'informasi') {
-          collectionName = 'informasi';
-        } else if (productType === 'jasa') {
-          collectionName = 'jasa';
-        } else {
-          console.error(`❌ Tipe produk tidak dikenal: ${productType}`);
-          setError('Tipe produk tidak dikenal.');
-          setLoading(false);
-          return;
-        }
+          const col = type === 'informasi' ? 'informasi' : 'jasa';
 
-        const collectionRef = db.collection(collectionName);
-        const snapshot = await collectionRef
-          .where('Pemilik', '==', actualCategory)
-          .get();
+          const snap = await db
+            .collection(col)
+            .where('Pemilik', '==', owner)
+            .get();
 
-        const fetchedProducts: ProductData[] = [];
-        snapshot.forEach((doc) => {
-          // *** PERBAIKAN KRUSIAL: Memastikan ID dokumen disertakan ***
-          fetchedProducts.push({
-            id: doc.id, // Ambil ID dokumen dari Firebase
-            ...(doc.data() as Omit<ProductData, 'id'>), // Ambil data lainnya, kecuali 'id'
-          });
-        });
+          const fetched = snap.docs.map((doc) => ({
+            id: doc.id,
+            ...(doc.data() as any),
+          }));
 
-        setProducts(fetchedProducts);
+          setProducts(fetched);
 
-        if (fetchedProducts.length > 0) {
-          setOwnerName(fetchedProducts[0].Pemilik);
-        } else {
-          setOwnerName(actualCategory);
+          const productInfo = productList.find(
+            (p) => p.paramCategory.split('_')[1] === owner
+          );
+
+          setIcon(productInfo?.icon || null);
+          setOwnerName(productInfo?.title || owner);
         }
       } catch (err) {
-        console.error(
-          `❌ Gagal mengambil produk untuk ${compositeCategory}:`,
-          err
-        );
-        setError(
-          `Gagal memuat produk untuk ${compositeCategory}. Silakan coba lagi nanti.`
-        );
+        console.error(err);
+        setError('Gagal memuat data.');
       } finally {
         setLoading(false);
       }
     };
 
     fetchProducts();
-  }, [compositeCategory]);
+  }, [category]);
 
-  return { products, ownerName, loading, error };
+  return { products, loading, error, icon, ownerName };
 };

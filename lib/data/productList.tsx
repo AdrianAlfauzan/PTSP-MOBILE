@@ -1,4 +1,3 @@
-// app/data/productList.tsx
 import React from 'react';
 
 // OUR ICONS
@@ -6,7 +5,7 @@ import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import Feather from '@expo/vector-icons/Feather';
 
 // OUR INTERFACES
-import { ProductType } from '@/interfaces/productDataProps';
+import { ProductType } from '@/interfaces/product/productDataBackendProps';
 
 export const productList = [
   {

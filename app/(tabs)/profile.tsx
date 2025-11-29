@@ -95,6 +95,7 @@ export default function ProfileTabs() {
                   }
                   textClassName="text-black text-[16px] pl-2"
                   textStyle={{ fontFamily: 'LexLight' }}
+                  onPress={() => router.push('/screens/orderScreen')}
                   onPressRightIcon={() => router.push('/screens/orderScreen')}
                 />
                 <ButtonCustom
@@ -132,7 +133,7 @@ export default function ProfileTabs() {
                   }
                   textClassName="text-black text-[16px] pl-2"
                   textStyle={{ fontFamily: 'LexLight' }}
-                  onPressRightIcon={() => handleShowPopup('editProfile')}
+                  onPress={() => handleShowPopup('editProfile')}
                 />
               </View>
 
@@ -153,7 +154,7 @@ export default function ProfileTabs() {
                   }
                   textClassName="text-black text-[16px] pl-2"
                   textStyle={{ fontFamily: 'LexLight' }}
-                  onPressRightIcon={() => handleShowPopup('securityProfile')}
+                  onPress={() => handleShowPopup('securityProfile')}
                 />
                 <ButtonCustom
                   classNameContainer="flex-row items-center justify-between  "
@@ -170,9 +171,7 @@ export default function ProfileTabs() {
                   }
                   textClassName="text-black text-[16px] pl-2"
                   textStyle={{ fontFamily: 'LexLight' }}
-                  onPressRightIcon={() =>
-                    handleShowPopup('notificationProfile')
-                  }
+                  onPress={() => handleShowPopup('notificationProfile')}
                 />
               </View>
               <ButtonCustom

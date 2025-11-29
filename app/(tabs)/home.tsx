@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Modal, Pressable, Text, StatusBar } from 'react-native';
+import { View, Modal, Pressable, Text } from 'react-native';
 import { heightPercentageToDP as hp } from 'react-native-responsive-screen';
 
 import { useRouter } from 'expo-router';
@@ -32,13 +32,15 @@ export default function HomeTabs() {
       {/* Animated Header */}
       <AnimatedHeader profileName={profile?.Nama_Lengkap || 'User Not Found'} />
 
-      <StatusBar barStyle="dark-content" />
-
       <SwipeCardsWrapper>
         {/* CARD LAYANAN */}
         <View key="1" className="bg-white" style={{ minHeight: hp(100) }}>
           {/* LAYANAN INFORMASI Section */}
           <View className="gap-4 py-4">
+            <ButtonCustom
+              text="AI DEVELOP"
+              onPress={() => router.push('/screens/AIChatScreen')}
+            />
             <Text
               style={{ fontFamily: 'LexBold' }}
               className="mb-4 text-2xl text-gray-800"

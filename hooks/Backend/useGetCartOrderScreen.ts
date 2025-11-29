@@ -1,3 +1,4 @@
+// hooks/useGetCartOrderScreen.ts
 import { useEffect, useState } from 'react';
 import { firebaseAuth, db } from '@/lib/firebase';
 
@@ -15,12 +16,14 @@ export const useGetCartOrderScreen = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [totalHarga, setTotalHarga] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [hasCartItems, setHasCartItems] = useState(false);
 
   useEffect(() => {
     const user = firebaseAuth.currentUser;
     if (!user) {
       setCartItems([]);
       setTotalHarga(0);
+      setHasCartItems(false); // ✅ UPDATE
       setLoading(false);
       return;
     }
@@ -41,6 +44,9 @@ export const useGetCartOrderScreen = () => {
           0
         );
 
+        const hasItems = allItems.length > 0; // ✅ LOGIC CHECK
+        setHasCartItems(hasItems); // ✅ UPDATE STATE
+
         const elapsed = Date.now() - startTime;
         const delay = Math.max(800 - elapsed, 0);
 
@@ -54,5 +60,5 @@ export const useGetCartOrderScreen = () => {
     return () => unsubscribe();
   }, []);
 
-  return { cartItems, totalHarga, loading };
+  return { cartItems, totalHarga, loading, hasCartItems }; // ✅ RETURN hasCartItems
 };

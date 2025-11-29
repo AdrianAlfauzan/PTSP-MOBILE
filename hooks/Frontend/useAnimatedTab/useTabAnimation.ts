@@ -4,14 +4,14 @@ import { LayoutChangeEvent, Animated } from 'react-native';
 
 // OUR INTERFACES
 import {
-  TabAnimationProps,
+  AnimatedTabBarProps,
   TabAnimationHookReturn,
-} from '@/interfaces/tabAnimationProps';
+} from '@/interfaces/animatedTabBarProps';
 
 export function useTabAnimation<GenericType extends string>(
   tabs: readonly GenericType[],
   initialTab: GenericType,
-  config: TabAnimationProps = {}
+  config: AnimatedTabBarProps = {}
 ): TabAnimationHookReturn<GenericType> {
   const { tension = 80, friction = 8, useNativeDriver = false } = config;
 

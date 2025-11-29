@@ -1,5 +1,4 @@
 import '@/global.css';
-import { useLoadFont } from '@/hooks/Frontend/useLoadFonts';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Stack } from 'expo-router';
 import {
@@ -10,6 +9,12 @@ import {
   View,
 } from 'react-native';
 import FlashMessage from 'react-native-flash-message';
+
+// OUR CONTEXTS
+import { InternetStatusProvider } from '@/context/InternetStatusContext';
+
+// OUR HOOKS
+import { useLoadFont } from '@/hooks/Frontend/useLoadFonts';
 
 export default function RootLayout() {
   const fontLoaded = useLoadFont();
@@ -41,46 +46,48 @@ export default function RootLayout() {
   };
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      {Platform.OS === 'ios' && (
-        <View style={{ height: 44, backgroundColor: '#1475BA' }} />
-      )}
+    <InternetStatusProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        {Platform.OS === 'ios' && (
+          <View style={{ height: 44, backgroundColor: '#1475BA' }} />
+        )}
 
-      <StatusBar
-        backgroundColor="#1475BA"
-        barStyle="light-content"
-        translucent={false}
-      />
-      <Stack screenOptions={{ headerShown: false, animation: 'fade' }} />
+        <StatusBar
+          backgroundColor="#1475BA"
+          barStyle="light-content"
+          translucent={false}
+        />
+        <Stack screenOptions={{ headerShown: false, animation: 'fade' }} />
 
-      <FlashMessage
-        position="top"
-        floating
-        transitionConfig={slideInUp}
-        style={{
-          zIndex: 9999,
-          borderRadius: 12,
-          margin: 16,
-          paddingVertical: 10,
-          paddingHorizontal: 16,
-          elevation: 4,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.2,
-          shadowRadius: 4,
-          overflow: 'hidden',
-        }}
-        titleStyle={{
-          fontFamily: 'LexBold',
-          fontSize: 16,
-          color: '#fff',
-        }}
-        textStyle={{
-          fontFamily: 'LexRegular',
-          fontSize: 14,
-          color: '#fff',
-        }}
-      />
-    </GestureHandlerRootView>
+        <FlashMessage
+          position="top"
+          floating
+          transitionConfig={slideInUp}
+          style={{
+            zIndex: 9999,
+            borderRadius: 12,
+            margin: 16,
+            paddingVertical: 10,
+            paddingHorizontal: 16,
+            elevation: 4,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.2,
+            shadowRadius: 4,
+            overflow: 'hidden',
+          }}
+          titleStyle={{
+            fontFamily: 'LexBold',
+            fontSize: 16,
+            color: '#fff',
+          }}
+          textStyle={{
+            fontFamily: 'LexRegular',
+            fontSize: 14,
+            color: '#fff',
+          }}
+        />
+      </GestureHandlerRootView>
+    </InternetStatusProvider>
   );
 }

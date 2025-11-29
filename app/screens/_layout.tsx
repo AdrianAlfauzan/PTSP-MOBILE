@@ -1,37 +1,43 @@
 // layouts/ScreensLayout.tsx
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text } from 'react-native';
 import { Stack } from 'expo-router';
 
-// OUR COMPONENTS
-import NavbarForScreens from '@/components/navbarForScreens';
-// OUR CONTEXT
-import { NavbarContextProvider } from '@/context/NavbarContext';
+// CONTEXTS
 import { SearchProvider } from '@/context/SearchContext';
+import { NavbarContextProvider } from '@/context/NavbarContext';
+import { useInternetStatusContext } from '@/context/InternetStatusContext';
 
-// OUR HOOKS
-import { useInternetStatus } from '@/hooks/Backend/useInternetStatus';
+// COMPONENTS
+import NavbarForScreens from '@/components/navbarForScreens';
+
+// HOOKS
 import useNavbarVisibility from '@/hooks/Frontend/useNavbarVisibility';
 
 export default function ScreensLayout() {
   const { showNavbar } = useNavbarVisibility();
-  const { isConnected } = useInternetStatus();
+  const { isConnected, justReconnected } = useInternetStatusContext();
   const [showReconnected, setShowReconnected] = useState(false);
 
   useEffect(() => {
-    if (isConnected) {
+    if (justReconnected) {
       setShowReconnected(true);
       const timer = setTimeout(() => setShowReconnected(false), 3000);
       return () => clearTimeout(timer);
     }
-  }, [isConnected]);
+  }, [justReconnected]);
 
   return (
     <SearchProvider>
       <NavbarContextProvider>
         <View className="flex-1">
+          {/* Navbar atas */}
           {showNavbar && <NavbarForScreens />}
+
+          {/* Stack navigator */}
           <Stack screenOptions={{ headerShown: false }} />
+
+          {/* Notifikasi koneksi merah */}
           {!isConnected && (
             <View
               className="absolute bottom-0 w-full bg-red-600 p-2"
@@ -42,6 +48,8 @@ export default function ScreensLayout() {
               </Text>
             </View>
           )}
+
+          {/* Notifikasi koneksi pulih hijau */}
           {showReconnected && (
             <View
               className="absolute bottom-0 w-full bg-green-600 p-2"
