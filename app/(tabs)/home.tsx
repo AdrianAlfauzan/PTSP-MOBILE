@@ -38,6 +38,10 @@ export default function HomeTabs() {
           {/* LAYANAN INFORMASI Section */}
           <View className="gap-4 py-4">
             <ButtonCustom
+              text="SUBMISSION"
+              onPress={() => router.push('/screens/submissionScreen')}
+            />
+            <ButtonCustom
               text="AI DEVELOP"
               onPress={() => router.push('/screens/AIChatScreen')}
             />

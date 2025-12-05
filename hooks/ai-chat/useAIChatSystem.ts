@@ -1,3 +1,4 @@
+// OUR HOOKS
 import { useAIChat } from '@/hooks/ai-chat/useAIChat';
 import { useAIProducts } from '@/hooks/ai-chat/useAIProducts';
 

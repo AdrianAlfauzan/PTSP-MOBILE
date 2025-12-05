@@ -1,7 +1,11 @@
 import { useState, useCallback } from 'react';
-import { Message } from '@/interfaces/ai-chat/ai-chat';
-import { getAIResponse } from '@/lib/services/ai/geminiService';
+
+// OUR INTERFACES
 import { ProductDataBackendProps } from '@/interfaces/product/productDataBackendProps';
+import { Message } from '@/interfaces/ai-chat/ai-chat';
+
+// OUR SERVICES
+import { getAIResponse } from '@/lib/services/ai/geminiService';
 
 interface UseAIChatProps {
   initialMessage?: string;

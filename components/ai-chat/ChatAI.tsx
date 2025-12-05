@@ -9,10 +9,16 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 
+// OUR HOOKS
 import { useGetCartOrderScreen } from '@/hooks/Backend/useGetCartOrderScreen';
 import { useAIChatSystem } from '@/hooks/ai-chat/useAIChatSystem';
-import { parseBoldText } from '@/utils/textBoldFormatter';
+
+// OUR INTERFACES
 import { Message } from '@/interfaces/ai-chat/ai-chat';
+
+// OUR UTILITIES
+import { parseBoldText } from '@/utils/textBoldFormatter';
+import { showAlertMessage } from '@/utils/showAlertMessage';
 
 const ChatAI = () => {
   const router = useRouter();
@@ -33,16 +39,30 @@ const ChatAI = () => {
   };
 
   const routerPush = (): void => {
-    if (actionButtonType === 'submission') {
+    if (actionButtonType === 'submission' && hasCartItems) {
+      // Hanya ke pengajuan jika button submission DAN ada cart items
       router.push('/screens/submissionScreen');
     } else if (actionButtonType === 'products') {
+      // Ke produk untuk button products
+      router.push('/(tabs)/product');
+    } else if (actionButtonType === 'submission' && !hasCartItems) {
+      // Jika button submission tapi tidak ada cart items
+      // Tampilkan alert atau tidak melakukan apa-apa
+      showAlertMessage(
+        'Tidak ada pesanan',
+        'Anda belum memiliki pesanan di keranjang. Silakan tambahkan layanan terlebih dahulu.'
+      );
+      // Atau arahkan ke produk
       router.push('/(tabs)/product');
     }
   };
 
+  // PERBAIKI: Text button berdasarkan kondisi
   const getButtonText = (): string => {
-    if (actionButtonType === 'submission') {
+    if (actionButtonType === 'submission' && hasCartItems) {
       return '📋 Lanjut ke Pengajuan';
+    } else if (actionButtonType === 'submission' && !hasCartItems) {
+      return '🛒 Belum Ada Pesanan - Lihat Produk';
     } else if (actionButtonType === 'products') {
       return '🛒 Buka Katalog Produk';
     }
@@ -50,10 +70,12 @@ const ChatAI = () => {
   };
 
   const getButtonColor = (): string => {
-    if (actionButtonType === 'submission') {
-      return '#28a745';
+    if (actionButtonType === 'submission' && hasCartItems) {
+      return '#28a745'; // Hijau untuk pengajuan (ada cart)
+    } else if (actionButtonType === 'submission' && !hasCartItems) {
+      return '#ffc107'; // Kuning untuk pengajuan (tidak ada cart)
     } else if (actionButtonType === 'products') {
-      return '#007AFF';
+      return '#007AFF'; // Biru untuk produk
     }
     return '#007AFF';
   };

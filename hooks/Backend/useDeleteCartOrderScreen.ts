@@ -1,4 +1,7 @@
+// OUR LIBRARIES
 import { db, firebaseAuth } from '@/lib/firebase';
+
+// OUR UTILITIES
 import { showAlertMessage } from '@/utils/showAlertMessage';
 
 export const useDeleteCartOrderScreen = () => {

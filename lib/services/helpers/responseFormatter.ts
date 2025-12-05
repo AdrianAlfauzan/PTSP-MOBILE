@@ -1,3 +1,4 @@
+// OUR INTERFACES
 import { ProductDataBackendProps } from '@/interfaces/product/productDataBackendProps';
 
 export const formatAIResponse = (
@@ -14,7 +15,7 @@ export const formatAIResponse = (
   console.log('- isAboutProducts:', isAboutProducts);
   console.log('- isAboutSubmission:', isAboutSubmission);
   console.log('- userHasItems:', userHasItems);
-  
+
   // Handle AI rejection responses
   const enhancedResponse = handleAIRejection(aiText);
 
@@ -23,7 +24,7 @@ export const formatAIResponse = (
     return `${enhancedResponse}\n\n🛍️ **Ingin lihat detail lengkap?**\n📱 **Buka Katalog Produk** untuk informasi lebih lanjut!`;
   }
 
-  // Handle submission intent
+  // Handle submission intent - PERBAIKAN DI SINI!
   if (isAboutSubmission && !isAboutProducts) {
     return handleSubmissionIntent(enhancedResponse, userHasItems);
   }
@@ -42,9 +43,11 @@ const handleSubmissionIntent = (
   aiText: string,
   userHasItems: boolean
 ): string => {
+  // ✅ PERBAIKAN: Hanya kasih button pengajuan JIKA ada cart items
   if (userHasItems) {
     return `${aiText}\n\n📋 **Anda sudah memiliki pesanan di keranjang!**\n🎯 **Silakan lanjutkan ke menu Pengajuan**`;
   } else {
+    // ❌ Jika tidak ada cart items, kasih button produk
     return `${aiText}\n\n⚠️ **Anda belum memiliki pesanan di keranjang**\n🛒 **Buka Katalog Produk untuk melihat layanan**`;
   }
 };

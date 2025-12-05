@@ -1,11 +1,14 @@
+// OUR CONSTANTS
+import { submissionOptions } from '@/constants/submissionOptions'; // ✅ IMPORT
+
+// OUR INTERFACES
+import { ProductDataBackendProps } from '@/interfaces/product/productDataBackendProps';
+
 // OUR LIBRARIES
 import { detectIntent } from '@/lib/services/helpers/intentDetector';
 import { formatAIResponse } from '@/lib/services/helpers/responseFormatter';
 import { buildAIPrompt } from '@/lib/services/helpers/promptBuilder';
 import { callGeminiAPI } from '@/lib/services/helpers/apiHandler';
-
-// OUR INTERFACES
-import { ProductDataBackendProps } from '@/interfaces/product/productDataBackendProps';
 
 export const getAIResponse = async (
   userQuestion: string,
@@ -22,8 +25,13 @@ export const getAIResponse = async (
     console.log(`📦 Is about products: ${isAboutProducts}`);
     console.log(`📊 Products data: ${products.length} items`);
 
-    // Build prompt
-    const prompt = buildAIPrompt(userQuestion, userHasItems, products);
+    // ✅ PASS submissionOptions ke prompt builder
+    const prompt = buildAIPrompt(
+      userQuestion,
+      userHasItems,
+      products,
+      submissionOptions // ✅ TAMBAH PARAMETER INI
+    );
 
     console.log('🔄 Mengirim ke Gemini AI...');
 

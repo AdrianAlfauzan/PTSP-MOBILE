@@ -1,3 +1,4 @@
+// OUR INTERFACES
 import { ProductDataBackendProps } from '@/interfaces/product/productDataBackendProps';
 
 export const formatProductsInfo = (
