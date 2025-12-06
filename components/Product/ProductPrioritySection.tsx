@@ -1,65 +1,84 @@
 // components/ProductPrioritySection.tsx
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, Image, TouchableOpacity } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 
+// HOOK
+import { useGetTopProducts } from '@/hooks/Backend/useGetTopProducts';
+
+// INTERFACES
 import { ProductDataBackendProps } from '@/interfaces/product/productDataBackendProps';
 
 interface ProductPrioritySectionProps {
-  title: string;
-  products: ProductDataBackendProps[];
-  loading: boolean;
   onAddToCart: (item: ProductDataBackendProps) => void;
-  icon: React.ReactNode;
-  ownerName: string;
   loadingAddToCart: boolean;
 }
 
 export default function ProductPrioritySection({
-  title,
-  products,
-  loading,
   onAddToCart,
-  icon,
-  ownerName,
+  loadingAddToCart,
 }: ProductPrioritySectionProps) {
+  const { topProducts, loadingTop } = useGetTopProducts();
+
   return (
     <View className="px-4 py-3">
-      <Text className="mb-2 text-lg font-semibold">{title}</Text>
+      <Text
+        className="mb-3 text-center text-xl text-yellow-600"
+        style={{ fontFamily: 'LexBold' }}
+      >
+        ⭐ Produk Prioritas
+      </Text>
 
-      {loading ? (
-        <Text>Loading...</Text>
-      ) : products.length === 0 ? (
+      {loadingTop ? (
+        <Text className="py-4 text-center text-gray-500">Memuat...</Text>
+      ) : topProducts.length === 0 ? (
         <Text className="py-4 text-center text-gray-500">
-          Produk Prioritas Tidak Ditemukan
+          Tidak ada produk prioritas
         </Text>
       ) : (
-        products.map((item) => (
+        topProducts.map((item) => (
           <View
             key={item.id}
-            className="mb-3 rounded-xl bg-white p-4 shadow-md"
+            className="my-3 items-center justify-center gap-6"
           >
-            {/* Jika kamu mau icon ditampilkan */}
-            <View className="flex-row items-center gap-2">
-              {icon}
-              <Text className="text-base font-semibold">{item.Nama}</Text>
-            </View>
+            <View className="h-auto w-[85%] rounded-[15px] border-2 border-b-[4px] border-x-black/5 border-b-black/10 border-t-black/5 bg-white p-3.5">
+              {/* GAMBAR */}
+              <View className="h-[200px] w-full shadow-xl">
+                <Image
+                  source={require('@/assets/images/ProductScreen/bg-icon.png')}
+                  className="h-full w-full rounded-[20px] object-cover"
+                />
 
-            <Text className="text-gray-600">{item.Deskripsi}</Text>
-            <Text className="mt-1 font-bold">Rp {item.Harga}</Text>
+                <View className="absolute inset-0 flex items-center justify-center px-2">
+                  <Text
+                    style={{ fontFamily: 'LexBold' }}
+                    className="text-md text-center font-semibold text-white"
+                  >
+                    {item.Nama}
+                  </Text>
+                </View>
+              </View>
 
-            {/* Owner / pemilik produk */}
-            <Text className="mt-1 text-sm text-gray-500">
-              Oleh: {ownerName}
-            </Text>
-
-            <TouchableOpacity
-              onPress={() => onAddToCart(item)}
-              className="mt-3 rounded-lg bg-blue-600 p-2"
-            >
-              <Text className="text-center text-white">
-                Tambah ke Keranjang
+              {/* HARGA */}
+              <Text
+                style={{ fontFamily: 'LexMedium' }}
+                className="py-3 text-center text-lg"
+              >
+                Rp {item.Harga.toLocaleString('id-ID')}
               </Text>
-            </TouchableOpacity>
+
+              {/* BUTTON ADD TO CART */}
+              <TouchableOpacity
+                disabled={loadingAddToCart}
+                onPress={() => onAddToCart(item)}
+                className="w-56 flex-row items-center justify-center gap-2 self-center rounded-lg bg-yellow-500 px-4 py-2.5"
+              >
+                <MaterialIcons name="star" size={18} color="white" />
+                <Text className="text-xs uppercase text-white">
+                  {loadingAddToCart ? 'Menambahkan...' : 'Tambah Prioritas'}
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
         ))
       )}

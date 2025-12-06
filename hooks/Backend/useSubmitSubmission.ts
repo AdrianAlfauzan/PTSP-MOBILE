@@ -1,12 +1,19 @@
+// OUR CONSTANTS
+import { submissionOptions } from '@/constants/submissionOptions';
+
+// OUR INTERFACES
+import CartItemProps from '@/interfaces/cartItemProps';
+
+// OUR LIBRARIES
 import {
   db,
   firebaseAuth,
   serverTimestamp,
   firebaseStorage,
 } from '@/lib/firebase';
-import { submissionOptions } from '@/constants/submissionOptions';
-import CartItemProps from '@/interfaces/cartItemProps';
-import { showAlertMessage } from '@/utils/showAlertMessage'; // 🔹 pakai utils
+
+// OUR UTILS
+import { showAlertMessage } from '@/utils/showAlertMessage';
 
 interface SubmitSubmissionOptions {
   selectedJenis: string;
@@ -24,7 +31,7 @@ interface SubmitSubmissionOptions {
   ajukanID?: string;
 }
 
-// 🔽 Generate ID_Transaksi unik maksimal 16 digit
+// Generate ID_Transaksi unik maksimal 16 digit
 const generateIdTransaksi = (length = 16) => {
   const chars =
     'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';

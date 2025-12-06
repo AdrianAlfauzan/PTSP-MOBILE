@@ -1,8 +1,12 @@
 // hooks/Backend/useGetProductsByCategory.ts
 import { useEffect, useState, ReactNode } from 'react';
-import { db } from '@/lib/firebase';
-import { productList } from '@/lib/data/productList';
+
+// OUR INTERFACES
 import { ProductDataBackendProps } from '@/interfaces/product/productDataBackendProps';
+
+// OUR LIBRARIES
+import { productList } from '@/lib/data/productList';
+import { db } from '@/lib/firebase';
 
 export const useGetProductsByCategory = (category: string) => {
   const [products, setProducts] = useState<ProductDataBackendProps[]>([]);
@@ -18,57 +22,9 @@ export const useGetProductsByCategory = (category: string) => {
         setLoading(true);
         setError(null);
 
-        const lower = category.toLowerCase();
-
-        // ========== PRIORITAS & TERSEDIA ==============
-        let statusToFetch: string | null =
-          lower === 'prioritas'
-            ? 'Top'
-            : lower === 'tersedia'
-              ? 'Tersedia'
-              : null;
-
-        if (statusToFetch) {
-          let result: ProductDataBackendProps[] = [];
-
-          // Ambil dari informasi
-          const infoSnap = await db
-            .collection('informasi')
-            .where('Status', '==', statusToFetch)
-            .get();
-
-          infoSnap.forEach((doc) =>
-            result.push({ id: doc.id, ...(doc.data() as any) })
-          );
-
-          // Ambil dari jasa
-          const jasaSnap = await db
-            .collection('jasa')
-            .where('Status', '==', statusToFetch)
-            .get();
-
-          jasaSnap.forEach((doc) =>
-            result.push({ id: doc.id, ...(doc.data() as any) })
-          );
-
-          setProducts(result);
-
-          // Set icon & title (ambil dari productList berdasarkan Pemilik pertama)
-          const owner = result.length > 0 ? result[0].Pemilik : '';
-
-          const productInfo = productList.find(
-            (p) => p.paramCategory.split('_')[1] === owner
-          );
-
-          setIcon(productInfo?.icon || null);
-          setOwnerName(productInfo?.title || owner || '');
-
-          setLoading(false);
-          return;
-        }
-
-        // ========== KATEGORI BIASA ==============
+        // ========== HANYA KATEGORI BIASA SAJA ==============
         const parts = category.split('_');
+
         if (parts.length >= 2) {
           const type = parts[0].toLowerCase();
           const owner = parts.slice(1).join('_');

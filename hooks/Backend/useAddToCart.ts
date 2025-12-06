@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { db, firebaseAuth } from '@/lib/firebase';
 import { router } from 'expo-router';
 
 // OUR INTERFACES
@@ -10,6 +9,9 @@ import {
 
 // OUR UTILS
 import { showAlertMessage } from '@/utils/showAlertMessage';
+
+// OUR LIBRARIES
+import { db, firebaseAuth } from '@/lib/firebase';
 
 type ProductDataForCart = ProductDataBackendProps;
 
@@ -34,30 +36,59 @@ export const useAddToCart = () => {
       return;
     }
 
-    const lowercasedProductType = receivedProductType.toLowerCase();
+    // ===============================
+    // 1. Tentukan tipe produk asli
+    // ===============================
+    let lowerType = receivedProductType?.toLowerCase();
+
+    // Jika produk adalah TOP → tentukan tipe asli berdasarkan Pemilik
+    if (product.Status === 'Top') {
+      if (product.Pemilik?.toLowerCase() === 'informasi') {
+        lowerType = 'informasi';
+      } else {
+        lowerType = 'jasa';
+      }
+    }
+
+    // ===============================
+    // 2. Validasi tipe
+    // ===============================
+    if (!lowerType || (lowerType !== 'informasi' && lowerType !== 'jasa')) {
+      console.error('❌ INVALID PRODUCT TYPE:', lowerType);
+      showAlertMessage(
+        'Error',
+        'Tipe produk tidak valid. Tidak dapat menambahkan ke keranjang.'
+      );
+      setLoadingAddToCart(false);
+      return;
+    }
+
+    // ===============================
+    // 3. Tentukan field
+    // ===============================
+    const collectionName = lowerType;
+    const idField = lowerType === 'informasi' ? 'ID_Informasi' : 'ID_Jasa';
+    const typeField = lowerType.charAt(0).toUpperCase() + lowerType.slice(1); // Informasi / Jasa
+
     const cartCollectionRef = db.collection('keranjang');
     const userCartDocRef = cartCollectionRef.doc(user.uid);
 
     try {
-      const collectionName =
-        lowercasedProductType === 'informasi' ? 'informasi' : 'jasa';
+      // Ambil produk dari koleksi asli
       const productRef = db.collection(collectionName).doc(product.id);
       const productSnap = await productRef.get();
 
       if (!productSnap.exists()) {
         showAlertMessage(
           'Produk Tidak Ditemukan',
-          'Maaf, produk ini tidak lagi tersedia di database atau ID-nya salah.'
+          'Maaf, produk ini tidak lagi tersedia di database.'
         );
         return;
       }
 
       const productRawData = productSnap.data();
       if (!productRawData) {
-        showAlertMessage(
-          'Error',
-          'Data produk tidak ditemukan, meskipun produk ada.'
-        );
+        showAlertMessage('Error', 'Data produk tidak ditemukan.');
         return;
       }
 
@@ -66,12 +97,9 @@ export const useAddToCart = () => {
         ...productRawData,
       } as ProductDataBackendProps;
 
-      const idField =
-        lowercasedProductType === 'informasi' ? 'ID_Informasi' : 'ID_Jasa';
-      const typeField =
-        lowercasedProductType.charAt(0).toUpperCase() +
-        lowercasedProductType.slice(1);
-
+      // ===============================
+      // 4. Payload item baru
+      // ===============================
       const newItemPayload = {
         Harga: productData.Harga,
         [idField]: productData.id,
@@ -81,44 +109,48 @@ export const useAddToCart = () => {
         Total_Harga: productData.Harga,
       };
 
+      // ===============================
+      // 5. Ambil keranjang user
+      // ===============================
       const userCartDoc = await userCartDocRef.get();
 
       if (userCartDoc.exists()) {
-        const currentCartData = userCartDoc.data();
-        const currentTypeArray = currentCartData?.[typeField] || [];
+        const currentCart = userCartDoc.data();
+        const currentTypeArray = currentCart?.[typeField] || [];
 
+        // Cek apakah produk sudah ada
         const existingProductIndex = currentTypeArray.findIndex(
           (item: any) => item[idField] === productData.id
         );
 
         if (existingProductIndex !== -1) {
-          const updatedKuantitas =
+          // Update kuantitas
+          const updatedQty =
             currentTypeArray[existingProductIndex].Kuantitas + 1;
-          const updatedTotalHarga = updatedKuantitas * productData.Harga;
+          const updatedTotal = updatedQty * productData.Harga;
 
           const updatedTypeArray = currentTypeArray.map(
-            (item: any, index: number) =>
-              index === existingProductIndex
-                ? {
-                    ...item,
-                    Kuantitas: updatedKuantitas,
-                    Total_Harga: updatedTotalHarga,
-                  }
+            (item: any, idx: number) =>
+              idx === existingProductIndex
+                ? { ...item, Kuantitas: updatedQty, Total_Harga: updatedTotal }
                 : item
           );
+
           await userCartDocRef.update({
             [typeField]: updatedTypeArray,
           });
 
           showAlertMessage(
             'Berhasil',
-            'Kuantitas produk di keranjang telah diperbarui!',
+            'Kuantitas produk di keranjang diperbarui!',
             'success'
           );
         } else {
+          // Tambahkan produk baru
           await userCartDocRef.update({
             [typeField]: [...currentTypeArray, newItemPayload],
           });
+
           showAlertMessage(
             'Berhasil',
             'Produk berhasil ditambahkan ke keranjang!',
@@ -126,12 +158,14 @@ export const useAddToCart = () => {
           );
         }
       } else {
+        // Keranjang user belum ada → buat baru
         await userCartDocRef.set({
           [typeField]: [newItemPayload],
         });
+
         showAlertMessage(
           'Berhasil',
-          'Produk berhasil ditambahkan ke keranjang baru!',
+          'Produk berhasil ditambahkan ke keranjang!',
           'success'
         );
       }
@@ -139,9 +173,7 @@ export const useAddToCart = () => {
       console.error('Gagal menambahkan ke keranjang:', error);
       showAlertMessage(
         'Error',
-        `Gagal menambahkan produk ke keranjang. Silakan coba lagi. ${
-          error.message || ''
-        }`
+        `Gagal menambahkan produk ke keranjang. ${error.message || ''}`
       );
     } finally {
       setLoadingAddToCart(false);

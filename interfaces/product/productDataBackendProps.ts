@@ -7,4 +7,5 @@ export interface ProductDataBackendProps {
   Pemilik: string;
   Status: string;
   id: string;
+  Tipe?: ProductType;
 }

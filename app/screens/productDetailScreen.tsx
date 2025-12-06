@@ -22,6 +22,7 @@ import { useAddToCart } from '@/hooks/Backend/useAddToCart';
 import { ProductType } from '@/interfaces/product/productDataBackendProps';
 
 export default function ProductDetailScreen() {
+  // ======================= PARAMS & KATEGORI =======================
   const params = useLocalSearchParams();
   const compositeCategory = params.category as string;
   const { searchQuery } = useSearch();
@@ -32,12 +33,14 @@ export default function ProductDetailScreen() {
   const productType = informationOrService[0] as ProductType;
   const categoryForIcon = informationOrService.slice(1).join('_');
 
+  // ======================= HOOKS =======================
   const { products, ownerName, icon, loading, error } =
     useGetProductsByCategory(compositeCategory);
   const { activePopupIndex, togglePopup, closePopup, fadeAnim } =
     usePopupDetailProductAnimation();
   const { loadingAddToCart, addToCart } = useAddToCart();
 
+  // ======================= FILTER SEARCH =======================
   const searchedProducts = useMemo(() => {
     if (!searchQuery.trim()) return products || [];
     const q = searchQuery.toLowerCase();
@@ -48,16 +51,6 @@ export default function ProductDetailScreen() {
         product.Pemilik.toLowerCase().includes(q)
     );
   }, [products, searchQuery]);
-
-  if (!compositeCategory) {
-    return (
-      <View className="flex-1 items-center justify-center bg-[#A7CBE5]">
-        <Text className="text-lg text-red-500">
-          Error: Kategori tidak ditemukan
-        </Text>
-      </View>
-    );
-  }
 
   return (
     <View className="flex-1 bg-[#A7CBE5]">

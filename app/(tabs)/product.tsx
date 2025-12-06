@@ -14,7 +14,6 @@ import { productTabs } from '@/constants/productTabs';
 // HOOKS
 import { useTabAnimation } from '@/hooks/Frontend/useAnimatedTab/useTabAnimation';
 import { useSkeletonForTab } from '@/hooks/Frontend/skeletons/useSkeletonForTab';
-import { useGetProductsByCategory } from '@/hooks/Backend/useGetProductsByCategory';
 import { useAddToCart } from '@/hooks/Backend/useAddToCart';
 
 // OUR LIBRARIES
@@ -22,6 +21,12 @@ import { productList } from '@/lib/data/productList';
 
 // CONTEXT
 import { useSearch } from '@/context/SearchContext';
+
+// INTERFACES
+import {
+  ProductDataBackendProps,
+  ProductType,
+} from '@/interfaces/product/productDataBackendProps';
 
 export default function Product() {
   const router = useRouter();
@@ -40,10 +45,6 @@ export default function Product() {
 
   // Skeleton loading
   const showSkeleton = useSkeletonForTab(activeTab);
-
-  // ================= BACKEND PRIORITAS ==================
-  const { products, loading, icon, ownerName } =
-    useGetProductsByCategory('Prioritas');
 
   // ================= FRONTEND FILTERING ==================
   const filteredByCategory = useMemo(() => {
@@ -73,6 +74,12 @@ export default function Product() {
     return searchedProducts.filter((item) => item.category === 'Jasa');
   }, [searchedProducts]);
 
+  // Handler khusus untuk produk Prioritas
+  const handleAddTopProductToCart = (item: ProductDataBackendProps) => {
+    const type: ProductType = (item.Tipe ||
+      (item.Status === 'Top' ? 'Top' : 'Informasi')) as ProductType;
+    addToCart(item, type);
+  };
   return (
     <View className="flex-1">
       {/* TAB */}
@@ -166,15 +173,10 @@ export default function Product() {
           />
         )}
 
-        {/* ====================== PRIORITAS (BACKEND) ====================== */}
+        {/* ====================== TOP PRODUCTS (BACKEND) ====================== */}
         {activeTab === 'Prioritas' && (
           <ProductPrioritySection
-            title="Produk Prioritas"
-            products={products}
-            loading={loading}
-            icon={icon}
-            ownerName={ownerName}
-            onAddToCart={(item) => addToCart(item, item.Status)}
+            onAddToCart={handleAddTopProductToCart}
             loadingAddToCart={loadingAddToCart}
           />
         )}

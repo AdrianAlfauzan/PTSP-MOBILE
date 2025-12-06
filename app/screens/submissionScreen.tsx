@@ -21,12 +21,14 @@ import FilePreviewModal from '@/components/filePreviewModal';
 import { useFilePreview } from '@/hooks/Frontend/filePreviewModalScreen/useFilePreview';
 import { useSelectDocument } from '@/hooks/Frontend/filePreviewModalScreen/useSelectDocument';
 import { useSubmitSubmission } from '@/hooks/Backend/useSubmitSubmission';
+import { useCheckCart } from '@/hooks/Backend/useCartChecker';
 
 // OUR ICON
 import { Ionicons } from '@expo/vector-icons';
 
 // OUR UTILS
 import getFileIcon from '@/utils/getFileIcon';
+import { showAlertMessage } from '@/utils/showAlertMessage';
 
 export default function SubmissionScreen() {
   const router = useRouter();
@@ -45,6 +47,10 @@ export default function SubmissionScreen() {
     openFileExternal,
   } = useFilePreview();
   const { submit } = useSubmitSubmission();
+  const { checkCart } = useCheckCart();
+  const [isCartChecked, setIsCartChecked] = useState(false);
+  const [cartAllowed, setCartAllowed] = useState(false);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const selectedData = submissionOptions.find(
@@ -111,6 +117,72 @@ export default function SubmissionScreen() {
     nextStep();
   };
 
+  // HANDLE SUBMIT
+  const handleSubmit = async () => {
+    if (isSubmitting) return;
+    if (!selectedActivityType || !selectedData) return;
+
+    const isAllFilesUploaded = selectedData.files.every(
+      (name) => !!fileMap[name]
+    );
+
+    if (!isAllFilesUploaded) {
+      alert('Harap unggah semua file persyaratan.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await submit({
+        selectedJenis: selectedActivityType,
+        jenisAjukan: selectedData.jenisAjukan as 'Gratis' | 'Berbayar',
+        uploadedFiles: fileMap,
+      });
+
+      router.replace('/screens/successOrderScreen');
+    } catch (err) {
+      console.error('❌ Gagal mengajukan:', err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // useEffect(() => {
+  //   const validateCart = async () => {
+  //     const { isEmpty } = await checkCart();
+
+  //     if (isEmpty) {
+  //       alert(
+  //         'Anda tidak memiliki produk di keranjang. Silakan pilih produk terlebih dahulu.'
+  //       );
+  //       router.back();
+  //     }
+  //   };
+
+  //   validateCart();
+  // }, []);
+  if (!isCartChecked) {
+    checkCart().then(({ isEmpty }) => {
+      if (isEmpty) {
+        showAlertMessage(
+          'Keranjang Kosong',
+          'Anda tidak memiliki produk di keranjang. Silakan pilih produk terlebih dahulu.',
+          'warning'
+        );
+        router.back();
+      } else {
+        setCartAllowed(true);
+      }
+      setIsCartChecked(true);
+    });
+
+    return (
+      <View className="flex-1 items-center justify-center bg-[#A7CBE5]">
+        <ActivityIndicator size="large" color="#1475BA" />
+      </View>
+    );
+  }
+  if (!cartAllowed) return null;
   return (
     <View className="flex-1 bg-[#A7CBE5]">
       <ScrollView
@@ -206,7 +278,10 @@ export default function SubmissionScreen() {
             </View>
             <View className="gap-10 space-y-4 px-7 pt-6">
               {selectedData.files.map((field, idx) => (
-                <View key={idx} className="rounded-2xl bg-gray-200 p-4 shadow-md">
+                <View
+                  key={idx}
+                  className="rounded-2xl bg-gray-200 p-4 shadow-md"
+                >
                   {/* Nama field */}
                   <Text
                     className="mb-2 text-[15px] text-gray-700"
@@ -348,34 +423,7 @@ export default function SubmissionScreen() {
           }`}
           text={isSubmitting ? '' : 'AJUKAN SEKARANG'}
           textClassName="text-[14px] text-center text-white"
-          onPress={async () => {
-            if (isSubmitting) return; // ❗ Proteksi dobel klik
-            if (!selectedActivityType || !selectedData) return;
-
-            const isAllFilesUploaded = selectedData.files.every(
-              (fileName) => !!fileMap[fileName]
-            );
-
-            if (!isAllFilesUploaded) {
-              alert('Harap unggah semua file persyaratan.');
-              return;
-            }
-
-            setIsSubmitting(true); // ✅ Aktifkan loading
-            try {
-              await submit({
-                selectedJenis: selectedActivityType,
-                jenisAjukan: selectedData.jenisAjukan as 'Gratis' | 'Berbayar',
-                uploadedFiles: fileMap,
-              });
-
-              router.replace('/screens/successOrderScreen');
-            } catch (err) {
-              console.error('❌ Gagal mengajukan:', err);
-            } finally {
-              setIsSubmitting(false);
-            }
-          }}
+          onPress={handleSubmit}
           isTouchable={
             !isSubmitting && !!selectedActivityType && isAllUploadComplete
           }

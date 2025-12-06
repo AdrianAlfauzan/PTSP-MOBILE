@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { WebView } from 'react-native-webview';
 
+// OUR INTERFACES
 import { UploadFileProps } from '@/interfaces/uploadFileProps';
 
 interface FilePreviewModalProps {
