@@ -1,4 +1,8 @@
 {
+  "cli": {
+    "appVersionSource": "remote",
+    "requireCommit": true
+  },
   "build": {
     "development": {
       "developmentClient": true,
@@ -17,8 +21,9 @@
       }
     },
     "production": {
+      "distribution": "internal",
       "android": {
-        "buildType": "app-bundle"
+        "buildType": "apk"
       }
     }
   },
