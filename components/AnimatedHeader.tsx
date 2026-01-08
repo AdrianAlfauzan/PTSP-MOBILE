@@ -70,6 +70,7 @@ export const AnimatedHeader: React.FC<AnimatedHeaderProps> = ({
         right: 0,
         zIndex: 0,
         elevation: 10,
+        backgroundColor: 'transparent',
       }}
     >
       <View className="pb-4">
@@ -92,61 +93,59 @@ export const AnimatedHeader: React.FC<AnimatedHeaderProps> = ({
             style={{
               position: 'relative',
               borderRadius: 16,
-              overflow: 'hidden', // penting supaya dot tetap di dalam gambar
-
-              // Shadow mirip custom button
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.15,
-              shadowRadius: 8,
-              elevation: 6,
+              overflow: 'hidden',
+              backgroundColor: 'transparent',
             }}
           >
             <Carousel
               loop
               autoPlay
               autoPlayInterval={3000}
-              width={wp('90%')} // responsive width
-              height={hp('22%')} // responsive height
+              width={wp('90%')}
+              height={hp('22%')}
               data={images}
               scrollAnimationDuration={800}
               onProgressChange={(_, absoluteProgress) => {
                 progress.value = absoluteProgress;
               }}
               renderItem={({ item }) => (
-                <Image
-                  source={item}
-                  style={{
-                    width: wp('90%'),
-                    height: hp('22%'),
-                    borderRadius: 16,
-                    resizeMode: 'cover',
-                  }}
-                />
+                <View style={{ position: 'relative' }}>
+                  <Image
+                    source={item}
+                    style={{
+                      width: wp('90%'),
+                      height: hp('22%'),
+                      borderRadius: 16,
+                      resizeMode: 'cover',
+                      backgroundColor: 'transparent',
+                      borderWidth: 0,
+                      borderColor: 'transparent',
+                    }}
+                  />
+                  {/* Dots di dalam setiap item carousel */}
+                  <View
+                    style={{
+                      position: 'absolute',
+                      bottom: hp('1.2%'),
+                      left: 0,
+                      right: 0,
+                      flexDirection: 'row',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}
+                  >
+                    {images.map((_, index) => (
+                      <ExpandingDot
+                        key={index}
+                        index={index}
+                        progress={progress}
+                        total={images.length}
+                      />
+                    ))}
+                  </View>
+                </View>
               )}
             />
-
-            {/* Expanding Dots Inside Image */}
-            <View
-              style={{
-                position: 'absolute',
-                bottom: hp('1.2%'),
-                left: 0,
-                right: 0,
-                flexDirection: 'row',
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
-              {images.map((_, index) => (
-                <ExpandingDot
-                  key={index}
-                  index={index}
-                  progress={progress}
-                  total={images.length}
-                />
-              ))}
-            </View>
           </View>
         </View>
 
