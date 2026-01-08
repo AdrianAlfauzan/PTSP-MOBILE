@@ -17,13 +17,15 @@
     "preview": {
       "distribution": "internal",
       "android": {
-        "buildType": "app-bundle"
+        "buildType": "apk"
       }
     },
     "production": {
-      "distribution": "internal",
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_ENV": "production"
       }
     }
   },
