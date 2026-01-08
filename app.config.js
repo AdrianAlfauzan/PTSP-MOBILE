@@ -60,7 +60,7 @@ export default {
     extra: {
       router: {},
       eas: {
-        projectId: '8ebf43da-73d8-46c9-978f-2fcf280a55cb',
+        projectId: 'e96a1613-053d-4313-a809-3737c476d019',
       },
       GOOGLE_WEB_CLIENT_ID: process.env.GOOGLE_WEB_CLIENT_ID,
       GEMINI_API_KEY: process.env.GEMINI_API_KEY,
