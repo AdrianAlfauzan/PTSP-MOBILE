@@ -36,7 +36,7 @@ export default {
       [
         'expo-splash-screen',
         {
-          image: './assets/images/splash-icon.png',
+          image: './assets/images/logo-bmkg.png',
           imageWidth: 200,
           resizeMode: 'contain',
           backgroundColor: '#ffffff',
@@ -60,7 +60,7 @@ export default {
     extra: {
       router: {},
       eas: {
-        projectId: 'e96a1613-053d-4313-a809-3737c476d019',
+        projectId: 'b3a45a33-d489-4af7-acf7-1fd6602d73fb',
       },
       GOOGLE_WEB_CLIENT_ID: process.env.GOOGLE_WEB_CLIENT_ID,
       GEMINI_API_KEY: process.env.GEMINI_API_KEY,
