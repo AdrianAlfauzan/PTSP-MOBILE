@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 import {
   db,
   firebaseAuth,
-  GoogleAuthProvider,
+  getGoogleCredential,
   GoogleSignin,
   statusCodes,
 } from '@/lib/firebase';
@@ -51,50 +51,87 @@ export const useGoogleLogin = () => {
 
       setLoading(true);
 
-      // Alert loading sementara
-      await showAlertMessage(
-        'Memproses Login...',
-        'Mohon tunggu sebentar',
-        'warning',
-        { duration: 3000 }
-      );
+      // Cek Google Play Services (WAJIB untuk Android)
+      try {
+        await GoogleSignin.hasPlayServices({
+          showPlayServicesUpdateDialog: true,
+        });
+        console.log('✅ Google Play Services available');
+      } catch (playServicesError: any) {
+        console.error('❌ Google Play Services error:', playServicesError);
+        await showAlertMessage(
+          'Google Play Services Diperlukan',
+          'Aplikasi membutuhkan Google Play Services untuk login. Pastikan sudah terinstall dan update.',
+          'error'
+        );
+        return;
+      }
 
-      // Delay supaya terlihat loading
-      await new Promise((resolve) => setTimeout(resolve, 3000));
+      console.log('🔧 Starting Google Sign-In...');
 
       // Step 1: Google Sign-In
-      const userInfo = await GoogleSignin.signIn();
-      if (!userInfo || userInfo.type === 'cancelled') {
+      const signInResult = await GoogleSignin.signIn();
+
+      if (!signInResult || signInResult.type === 'cancelled') {
         console.log('❎ Login dibatalkan oleh pengguna.');
         return;
       }
 
-      // Step 2: Firebase Sign-In
-      const { idToken } = await GoogleSignin.getTokens();
-      if (!idToken)
-        throw new Error('ID Token tidak ditemukan setelah login Google.');
+      // Handle response structure - versi baru library
+      let userEmail = 'Unknown';
+      let idTokenFromGoogle: string | null = null;
 
-      const credential = GoogleAuthProvider.credential(idToken);
+      // Cek struktur response yang berbeda
+      if (signInResult.data) {
+        // Versi baru: signInResult.data.user & signInResult.data.idToken
+        userEmail = signInResult.data.user?.email || 'No email';
+        idTokenFromGoogle = signInResult.data.idToken;
+      } else if ((signInResult as any).user) {
+        // Versi lama: signInResult.user langsung
+        userEmail = (signInResult as any).user?.email || 'No email';
+      }
+
+      console.log('✅ Google Sign-In successful:', userEmail);
+
+      // Step 2: Get ID Token - cara yang lebih reliable
+      let idToken = idTokenFromGoogle;
+
+      // Jika idToken tidak ada di response, ambil dari getTokens()
+      if (!idToken) {
+        const tokens = await GoogleSignin.getTokens();
+        idToken = tokens.idToken;
+      }
+
+      if (!idToken) {
+        throw new Error('ID Token tidak ditemukan setelah login Google.');
+      }
+
+      console.log('🔑 Got ID token, creating credential...');
+
+      // Step 3: Create Firebase Credential
+      const credential = getGoogleCredential(idToken);
+
+      // Step 4: Sign in to Firebase
       const userCredential =
         await firebaseAuth.signInWithCredential(credential);
-      const user = userCredential.user;
+      const firebaseUser = userCredential.user;
 
-      console.log('🔥 Login Firebase berhasil:', user.email);
+      console.log('🔥 Firebase login successful:', firebaseUser.email);
 
-      // Step 3: Cek user di Firestore
-      const registrationStatus = await checkUserRegistration(user.uid);
+      // Step 5: Cek user di Firestore
+      const registrationStatus = await checkUserRegistration(firebaseUser.uid);
 
       if (
         registrationStatus === 'perorangan' ||
         registrationStatus === 'perusahaan'
       ) {
         // Ambil nama lengkap dari dokumen
-        const docRef = db.collection(registrationStatus).doc(user.uid);
+        const docRef = db.collection(registrationStatus).doc(firebaseUser.uid);
         const docSnap = await docRef.get();
         const fullName =
           docSnap.exists() && docSnap.data()?.nama_lengkap
             ? docSnap.data()?.nama_lengkap
-            : (user.displayName ?? 'Pengguna');
+            : (firebaseUser.displayName ?? 'Pengguna');
 
         await showAlertMessage(
           'Berhasil Login!',
@@ -112,15 +149,36 @@ export const useGoogleLogin = () => {
         router.replace('/screens/registerScreen');
       }
     } catch (error: any) {
+      console.error('❌ Login gagal DETAIL:', {
+        code: error.code,
+        message: error.message,
+        stack: error.stack,
+      });
+
+      // Handle error lebih spesifik
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
         console.log('❎ User membatalkan login.');
         return;
       }
 
-      console.error('❌ Login gagal:', error);
+      if (error.code === statusCodes.IN_PROGRESS) {
+        console.log('🔄 Login sedang diproses...');
+        return;
+      }
+
+      if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        await showAlertMessage(
+          'Google Play Services Tidak Tersedia',
+          'Install atau update Google Play Services terlebih dahulu.',
+          'error'
+        );
+        return;
+      }
+
+      // Error umum
       await showAlertMessage(
         'Login Gagal',
-        error?.message ?? 'Terjadi kesalahan saat login.',
+        error?.message ?? 'Terjadi kesalahan saat login. Coba lagi.',
         'error'
       );
     } finally {
