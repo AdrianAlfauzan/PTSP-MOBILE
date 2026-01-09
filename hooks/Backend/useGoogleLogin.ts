@@ -1,7 +1,6 @@
 // useGoogleLogin.ts
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
-import { Platform } from 'react-native'; // INI DIBUTUHKAN
 
 // OUR LIBRARIES
 import {
@@ -24,7 +23,6 @@ export const useGoogleLogin = () => {
   const [loading, setLoading] = useState(false);
   const { isConnected } = useInternetStatusContext();
 
-  // Cek apakah user sudah terdaftar di Firestore
   const checkUserRegistration = async (uid: string) => {
     const peroranganRef = db.collection('perorangan').doc(uid);
     const perusahaanRef = db.collection('perusahaan').doc(uid);
@@ -41,7 +39,6 @@ export const useGoogleLogin = () => {
 
   const signIn = async () => {
     try {
-      // Cek koneksi internet
       if (!isConnected) {
         await showAlertMessage(
           'Tidak Ada Koneksi Internet',
@@ -53,72 +50,58 @@ export const useGoogleLogin = () => {
 
       setLoading(true);
 
-      // Alert loading sementara
       await showAlertMessage(
         'Memproses Login...',
         'Mohon tunggu sebentar',
         'warning',
-        { duration: 3000 }
+        { duration: 1000 }
       );
 
-      // Step 1: Konfigurasi ulang Google Sign-In sebelum login
+      // Konfigurasi Google Sign-In
       const isConfigured = configureGoogleSignIn();
       if (!isConfigured) {
         throw new Error('Gagal mengkonfigurasi Google Sign-In');
       }
 
-      // Delay supaya terlihat loading
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Cek Google Play Services untuk Android
+      await GoogleSignin.hasPlayServices({
+        showPlayServicesUpdateDialog: true,
+      });
 
-      // Step 2: Cek apakah Google Play Services tersedia (Android only)
-      if (Platform.OS === 'android') {
-        const hasPlayServices = await GoogleSignin.hasPlayServices({
-          showPlayServicesUpdateDialog: true,
-        });
-
-        if (!hasPlayServices) {
-          throw new Error('Google Play Services tidak tersedia');
-        }
-      }
-
-      // Step 3: Sign Out terlebih dahulu untuk menghindari cache issue
+      // Sign out dulu untuk bersihkan cache
       try {
         await GoogleSignin.signOut();
-        console.log('✅ Signed out from Google');
-      } catch {
-        // Ignore sign out errors
-        console.log('ℹ️ Sign out not necessary');
+      } catch (error) {
+        console.log('Sign out tidak diperlukan:', error);
       }
 
-      // Step 4: Google Sign-In
+      // Google Sign-In
       const userInfo = await GoogleSignin.signIn();
       if (!userInfo || userInfo.type === 'cancelled') {
-        console.log('❎ Login dibatalkan oleh pengguna.');
+        console.log('Login dibatalkan');
         return;
       }
 
-      // Step 5: Get ID Token
+      // Get ID Token
       const tokens = await GoogleSignin.getTokens();
       if (!tokens.idToken) {
-        throw new Error('ID Token tidak ditemukan setelah login Google.');
+        throw new Error('ID Token tidak ditemukan');
       }
 
-      // Step 6: Firebase Sign-In
+      // PERBAIKAN DI SINI: credential BUKAN creatential
       const credential = GoogleAuthProvider.credential(tokens.idToken);
+
+      // Firebase Sign-In
       const userCredential =
         await firebaseAuth.signInWithCredential(credential);
       const user = userCredential.user;
 
-      console.log('🔥 Login Firebase berhasil:', user.email);
+      console.log('Login Firebase berhasil:', user.email);
 
-      // Step 7: Cek user di Firestore
+      // Cek registrasi
       const registrationStatus = await checkUserRegistration(user.uid);
 
-      if (
-        registrationStatus === 'perorangan' ||
-        registrationStatus === 'perusahaan'
-      ) {
-        // Ambil nama lengkap dari dokumen
+      if (registrationStatus) {
         const docRef = db.collection(registrationStatus).doc(user.uid);
         const docSnap = await docRef.get();
         const fullName =
@@ -142,10 +125,9 @@ export const useGoogleLogin = () => {
         router.replace('/screens/registerScreen');
       }
     } catch (error: any) {
-      console.error('❌ Login gagal:', error);
+      console.error('Login gagal:', error);
 
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-        console.log('❎ User membatalkan login.');
         return;
       }
 
@@ -154,15 +136,6 @@ export const useGoogleLogin = () => {
           'Login Sedang Berlangsung',
           'Silakan tunggu proses login sebelumnya selesai.',
           'warning'
-        );
-        return;
-      }
-
-      if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-        await showAlertMessage(
-          'Google Play Services Tidak Tersedia',
-          'Pastikan Google Play Services terinstall dan update.',
-          'error'
         );
         return;
       }

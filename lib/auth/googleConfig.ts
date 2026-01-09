@@ -6,24 +6,22 @@ export const configureGoogleSignIn = () => {
   const webClientId = Constants.expoConfig?.extra?.GOOGLE_WEB_CLIENT_ID;
 
   if (!webClientId) {
-    console.error(
-      '❌ GOOGLE_WEB_CLIENT_ID tidak ditemukan. Cek app.config.ts atau .env'
-    );
+    console.error('GOOGLE_WEB_CLIENT_ID tidak ditemukan');
     return false;
   }
 
   try {
     GoogleSignin.configure({
       webClientId,
-      offlineAccess: false,
+      offlineAccess: true,
       forceCodeForRefreshToken: false,
       scopes: ['profile', 'email'],
     });
 
-    console.log('✅ Google Sign-In configured successfully');
+    console.log('Google Sign-In configured');
     return true;
   } catch (error) {
-    console.error('❌ Error configuring Google Sign-In:', error);
+    console.error('Error configuring Google Sign-In:', error);
     return false;
   }
 };

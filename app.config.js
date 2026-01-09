@@ -15,7 +15,6 @@ export default {
       supportsTablet: true,
       jsEngine: 'jsc',
       bundleIdentifier: 'com.ptsp.mobile',
-      googleServicesFile: './GoogleService-Info.plist',
     },
     android: {
       googleServicesFile: './google-services.json',

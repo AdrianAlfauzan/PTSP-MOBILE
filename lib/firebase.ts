@@ -1,5 +1,6 @@
-import firestore from '@react-native-firebase/firestore';
+// lib/firebase.ts
 import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
 import {
   GoogleSignin as _GoogleSignin,
@@ -10,7 +11,7 @@ import {
 export const db = firestore();
 export const serverTimestamp = firestore.FieldValue.serverTimestamp;
 
-// Auth
+// Auth - PERBAIKAN: Export GoogleAuthProvider dari firebase/auth
 export const firebaseAuth = auth();
 export const GoogleAuthProvider = auth.GoogleAuthProvider;
 
