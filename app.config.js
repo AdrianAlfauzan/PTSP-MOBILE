@@ -1,3 +1,4 @@
+// app.config.ts
 import 'dotenv/config';
 
 export default {
@@ -13,6 +14,8 @@ export default {
     ios: {
       supportsTablet: true,
       jsEngine: 'jsc',
+      bundleIdentifier: 'com.ptsp.mobile',
+      googleServicesFile: './GoogleService-Info.plist',
     },
     android: {
       googleServicesFile: './google-services.json',
@@ -49,11 +52,19 @@ export default {
             compileSdkVersion: 35,
             targetSdkVersion: 34,
             buildToolsVersion: '34.0.0',
+            // Tambahkan ini
+            enableProguardInReleaseBuilds: true,
+            extraMavenRepos: [
+              'https://maven.google.com/',
+              'https://www.jitpack.io',
+            ],
+          },
+          ios: {
+            deploymentTarget: '15.1',
           },
         },
       ],
     ],
-
     experiments: {
       typedRoutes: true,
     },

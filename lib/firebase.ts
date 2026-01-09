@@ -1,6 +1,5 @@
-// lib/firebase.ts
 import firestore from '@react-native-firebase/firestore';
-import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
+import auth from '@react-native-firebase/auth';
 import storage from '@react-native-firebase/storage';
 import {
   GoogleSignin as _GoogleSignin,
@@ -15,17 +14,9 @@ export const serverTimestamp = firestore.FieldValue.serverTimestamp;
 export const firebaseAuth = auth();
 export const GoogleAuthProvider = auth.GoogleAuthProvider;
 
-// Untuk Firebase v9+ style credential
-export const getGoogleCredential = (idToken: string) => {
-  return auth.GoogleAuthProvider.credential(idToken);
-};
-
 // Storage
 export const firebaseStorage = storage();
 
 // Google Sign-In
 export const GoogleSignin = _GoogleSignin;
 export const statusCodes = _statusCodes;
-
-// Export auth instance juga
-export { auth };

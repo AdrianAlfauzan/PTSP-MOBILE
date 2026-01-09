@@ -1,3 +1,4 @@
+// loginScreen.tsx
 import { Image, Animated, View, Text, Easing } from 'react-native';
 import { useEffect, useRef } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -90,7 +91,7 @@ export default function LoginScreen() {
             iconPosition="left"
             image={require('@/assets/images/LoginScreen/google.png')}
             onPress={!loading ? signIn : undefined}
-            disabled={loading} 
+            disabled={loading}
           >
             {loading ? 'Sedang Masuk...' : 'Masuk Menggunakan Google aja'}
           </Button>
