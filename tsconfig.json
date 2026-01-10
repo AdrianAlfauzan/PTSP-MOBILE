@@ -5,19 +5,14 @@
     "allowJs": true,
     "esModuleInterop": true,
     "jsx": "react-native",
-    "lib": [
-      "DOM",
-      "ESNext"
-    ],
+    "lib": ["DOM", "ESNext"],
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "target": "ESNext",
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@/*": ["./*"]
     }
   },
   "include": [
@@ -27,7 +22,5 @@
     "expo-env.d.ts",
     "nativewind-env.d.ts"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }
