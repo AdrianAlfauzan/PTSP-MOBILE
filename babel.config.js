@@ -11,8 +11,7 @@ module.exports = function (api) {
       'nativewind/babel',
     ],
     plugins: [
-      'react-native-worklets-core/plugin', // Add this explicitly
-      'react-native-reanimated/plugin', // Reanimated MUST be last
+      'react-native-reanimated/plugin', // Biarkan ini yang mengurus worklets
     ],
   };
 };
