@@ -1,6 +1,4 @@
-// app.config.ts
-import 'dotenv/config';
-
+// app.config.js
 export default {
   expo: {
     name: 'ptsp',
@@ -51,7 +49,6 @@ export default {
             compileSdkVersion: 35,
             targetSdkVersion: 34,
             buildToolsVersion: '34.0.0',
-            // Tambahkan ini
             enableProguardInReleaseBuilds: true,
             extraMavenRepos: [
               'https://maven.google.com/',

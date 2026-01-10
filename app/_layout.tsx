@@ -1,4 +1,4 @@
-import '@/global.css';
+import '../global.css';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Stack } from 'expo-router';
 import {

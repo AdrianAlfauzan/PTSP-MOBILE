@@ -43,7 +43,7 @@ export default function ScreensLayout() {
               className="absolute bottom-0 w-full bg-red-600 p-2"
               style={{ zIndex: 1000 }}
             >
-              <Text className="font-LexBold text-center text-white">
+              <Text className="font-LexBold text-center text-red-600">
                 Tidak ada koneksi internet
               </Text>
             </View>
