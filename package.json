@@ -1,6 +1,6 @@
 {
   "name": "ptsp",
-  "main": "expo-router/entry",
+  "main": "index.js",
   "version": "1.0.0",
   "scripts": {
     "start": "expo start",
@@ -8,7 +8,9 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "eas:dev": "eas build --profile development --platform android",
+    "eas:prod": "eas build --profile production --platform android"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",

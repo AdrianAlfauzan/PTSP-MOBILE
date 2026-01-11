@@ -1,0 +1,9 @@
+Remove-Item -Recurse -Force .expo -ErrorAction SilentlyContinue
+Remove-Item -Recurse -Force .metro-cache -ErrorAction SilentlyContinue
+Remove-Item -Recurse -Force "$env:TEMP\metro-*" -ErrorAction SilentlyContinue
+Remove-Item -Recurse -Force "$env:TEMP\react-*" -ErrorAction SilentlyContinue
+Remove-Item -Recurse -Force "$env:LOCALAPPDATA\Temp\metro-*" -ErrorAction SilentlyContinue
+Remove-Item -Recurse -Force node_modules\.cache -ErrorAction SilentlyContinue
+Remove-Item -Force tsconfig.tsbuildinfo -ErrorAction SilentlyContinue
+Remove-Item -Force *.tsbuildinfo -ErrorAction SilentlyContinue
+npm cache clean --force
