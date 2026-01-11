@@ -1,4 +1,5 @@
-// app.config.js
+import 'dotenv/config';
+
 export default {
   expo: {
     name: 'ptsp',
@@ -12,7 +13,6 @@ export default {
     ios: {
       supportsTablet: true,
       jsEngine: 'jsc',
-      bundleIdentifier: 'com.ptsp.mobile',
     },
     android: {
       googleServicesFile: './google-services.json',
@@ -36,7 +36,7 @@ export default {
       [
         'expo-splash-screen',
         {
-          image: './assets/images/logo-bmkg.png',
+          image: './assets/images/splash-icon.png',
           imageWidth: 200,
           resizeMode: 'contain',
           backgroundColor: '#ffffff',
@@ -49,29 +49,20 @@ export default {
             compileSdkVersion: 35,
             targetSdkVersion: 34,
             buildToolsVersion: '34.0.0',
-            enableProguardInReleaseBuilds: true,
-            extraMavenRepos: [
-              'https://maven.google.com/',
-              'https://www.jitpack.io',
-            ],
-          },
-          ios: {
-            deploymentTarget: '15.1',
           },
         },
       ],
     ],
+
     experiments: {
       typedRoutes: true,
     },
     extra: {
       router: {},
       eas: {
-        projectId: 'b3a45a33-d489-4af7-acf7-1fd6602d73fb',
+        projectId: '9b5ac92f-8879-418c-8ca2-a6a3201f5ded',
       },
       GOOGLE_WEB_CLIENT_ID: process.env.GOOGLE_WEB_CLIENT_ID,
-      GEMINI_API_KEY: process.env.GEMINI_API_KEY,
-      GEMINI_MODEL: process.env.GEMINI_MODEL,
     },
   },
 };
